@@ -1,0 +1,609 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>SynView — Dependent quota prototype</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lilita+One&amp;display=swap" rel="stylesheet">
+  <!--
+    PROTOTYPE — throw away after a direction is selected.
+    Question: Can Bars and Rings coexist as a user-selected Usage layout setting?
+    Two selectable layouts, switchable from the in-app Settings tab.
+    Run: python3 -m http.server 4174 --directory Prototypes/quota-gates
+  -->
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: ui-rounded, "SF Pro Rounded", "SF Pro Display", system-ui, sans-serif;
+      font-synthesis: none;
+      --ink: #2f2948;
+      --muted: #69647a;
+      --page: #eaf6ff;
+      --paper: #fffdf9;
+      --paper-2: #f6f1ff;
+      --pink: #ffabd0;
+      --pink-strong: #b33d73;
+      --yellow: #fff09a;
+      --yellow-strong: #67527f;
+      --weekly-fill: #f4d66f;
+      --planner-ink: #2f2948;
+      --planner-muted: #665e73;
+      --planner-panel: rgb(255 255 255 / 0.34);
+      --mint: #a6e6ca;
+      --mint-strong: #17694a;
+      --blue: #b9ebff;
+      --blue-ink: #2f2948;
+      --blue-muted: #57516b;
+      --purple: #7159bd;
+      --outline: #393250;
+      --sticker-outline: #2f2948;
+      --sticker-shadow: #7861c7;
+      --sticker-ink-shadow: #2f2948;
+      --hairline: rgb(57 50 80 / 0.18);
+      --shadow: rgb(50 42 72 / 0.14);
+      --tab: rgb(255 253 249 / 0.86);
+      --danger-surface: #ffe0ec;
+      --danger-ink: #81244f;
+      --dot: rgb(73 138 178 / 0.24);
+    }
+
+    [data-theme="dark"] {
+      color-scheme: dark;
+      --ink: #f5f2ff;
+      --muted: #bbb5cd;
+      --page: #11101a;
+      --paper: #211e2d;
+      --paper-2: #29243a;
+      --pink: #713354;
+      --pink-strong: #ff9cc9;
+      --yellow: #efe2a2;
+      --yellow-strong: #59486f;
+      --weekly-fill: #e8cf78;
+      --planner-ink: #2f2948;
+      --planner-muted: #675e72;
+      --planner-panel: rgb(255 255 255 / 0.32);
+      --mint: #275d49;
+      --mint-strong: #9be5c1;
+      --blue: #294f70;
+      --blue-ink: #f5f2ff;
+      --blue-muted: #d7d1e8;
+      --purple: #aa97f0;
+      --outline: #716a84;
+      --sticker-outline: #817993;
+      --sticker-shadow: #584a82;
+      --sticker-ink-shadow: #090811;
+      --hairline: rgb(245 242 255 / 0.13);
+      --shadow: rgb(0 0 0 / 0.42);
+      --tab: rgb(35 31 48 / 0.88);
+      --danger-surface: #5a263f;
+      --danger-ink: #ffc1db;
+      --dot: rgb(170 153 230 / 0.14);
+    }
+
+    * { box-sizing: border-box; }
+    html { min-height: 100%; background: var(--page); }
+    body {
+      min-height: 100vh;
+      margin: 0;
+      color: var(--ink);
+      background-color: var(--page);
+      background-image: radial-gradient(circle, var(--dot) 1.3px, transparent 1.4px);
+      background-size: 18px 18px;
+    }
+    button { color: inherit; font: inherit; }
+    button:focus-visible { outline: 3px solid var(--purple); outline-offset: 3px; }
+
+    .prototype-controls {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      padding: max(10px, env(safe-area-inset-top)) 12px 10px;
+      border-bottom: 1px solid rgb(255 255 255 / 0.5);
+      background: rgb(28 24 42 / 0.92);
+      color: white;
+      box-shadow: 0 8px 24px rgb(20 16 34 / 0.16);
+      backdrop-filter: blur(18px);
+    }
+    .control-inner { width: min(100%, 760px); margin: 0 auto; }
+    .control-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+    .control-label { margin: 0; color: #cfc8e6; font-size: 10px; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; }
+    .control-theme { padding: 5px 9px; border: 1px solid rgb(255 255 255 / 0.2); border-radius: 999px; background: rgb(255 255 255 / 0.08); color: white; cursor: pointer; font-size: 10px; font-weight: 800; }
+    .state-picker { display: flex; gap: 6px; overflow-x: auto; padding: 1px 1px 4px; scrollbar-width: none; }
+    .state-picker::-webkit-scrollbar { display: none; }
+    .state-picker button {
+      flex: 0 0 auto;
+      padding: 8px 11px;
+      border: 1px solid rgb(255 255 255 / 0.2);
+      border-radius: 999px;
+      background: rgb(255 255 255 / 0.08);
+      color: #eeeafa;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 750;
+    }
+    .state-picker button.active { border-color: #dccfff; background: #725eb4; color: white; }
+
+    .device {
+      width: min(100%, 420px);
+      min-height: calc(100vh - 73px);
+      margin: 0 auto;
+      padding: 24px 18px calc(42px + env(safe-area-inset-bottom));
+    }
+    .app-header { display: flex; align-items: center; justify-content: space-between; margin: 0 0 18px; }
+    .app-header h1 {
+      margin: 0;
+      font-family: "Lilita One", ui-rounded, "SF Pro Rounded", system-ui, sans-serif;
+      font-size: 40px;
+      font-weight: 400;
+      letter-spacing: -.02em;
+      line-height: .95;
+    }
+    .header-button {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border: 2px solid var(--sticker-outline);
+      border-radius: 50%;
+      background: var(--yellow);
+      color: var(--planner-ink);
+      box-shadow: 3px 3px 0 var(--sticker-ink-shadow);
+      cursor: pointer;
+    }
+    .header-button svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2.2; }
+    .header-button.refreshing svg { animation: spin .55s ease; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .sticker {
+      display: inline-block;
+      margin: 0 0 20px;
+      padding: 9px 14px;
+      transform: rotate(-2deg);
+      border: 2px solid var(--sticker-outline);
+      border-radius: 9px;
+      background: var(--pink);
+      box-shadow: 4px 4px 0 var(--sticker-ink-shadow);
+      font-size: 17px;
+      font-weight: 900;
+      letter-spacing: .015em;
+    }
+    .card {
+      border: 2px solid var(--sticker-outline);
+      border-radius: 24px;
+      background: var(--paper);
+      box-shadow: 7px 8px 0 var(--sticker-shadow);
+    }
+    .eyebrow { color: var(--muted); font-size: 10px; font-weight: 850; letter-spacing: .07em; text-transform: uppercase; }
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 10px;
+      border: 2px solid var(--sticker-outline);
+      border-radius: 999px;
+      box-shadow: 2px 2px 0 var(--sticker-ink-shadow);
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .045em;
+      text-transform: uppercase;
+    }
+    .status-pill::before { width: 8px; height: 8px; border-radius: 50%; background: currentColor; content: ""; }
+    .tone-ready .status-pill { background: var(--mint); color: var(--mint-strong); }
+    .tone-paused .status-pill { background: var(--danger-surface); color: var(--danger-ink); }
+    .status-title { margin: 12px 0 5px; font-size: 26px; line-height: 1.04; letter-spacing: -.04em; }
+    .status-copy { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.4; }
+    .meter { height: 16px; overflow: hidden; position: relative; border: 2px solid var(--sticker-outline); border-radius: 6px; background: var(--hairline); }
+    .meter > i { display: block; width: var(--value); height: 100%; background: var(--meter-color, var(--mint-strong)); transition: width .25s ease; }
+    .meter::after { position: absolute; inset: 0; background: repeating-linear-gradient(to right, transparent 0, transparent calc(10% - 2px), var(--sticker-outline) calc(10% - 2px), var(--sticker-outline) 10%); opacity: .36; content: ""; pointer-events: none; }
+    .blocked .meter > i { background: var(--pink-strong); }
+    .quota-number { font-variant-numeric: tabular-nums; }
+    .subdued { opacity: 1; }
+
+    /* Variant A — one vertically linked gate ledger. */
+    .gate-ledger { overflow: hidden; }
+    .gate-summary { padding: 20px; border-bottom: 2px dashed var(--hairline); }
+    .gate-row { padding: 18px 20px; }
+    .gate-row + .gate-row { border-top: 1px solid var(--hairline); }
+    .gate-row-head { display: grid; grid-template-columns: 42px 1fr auto; align-items: center; gap: 12px; }
+    .quota-icon { width: 42px; height: 42px; display: grid; place-items: center; border: 2px solid var(--sticker-outline); border-radius: 50%; background: var(--yellow); box-shadow: 2px 2px 0 var(--sticker-ink-shadow); font-size: 19px; }
+    .weekly .quota-icon { color: var(--planner-ink); }
+    .short .quota-icon { background: var(--blue); }
+    .gate-row h3 { margin: 0 0 3px; font-size: 15px; }
+    .gate-row p { margin: 0; color: var(--muted); font-size: 12px; }
+    .gate-value { text-align: right; }
+    .gate-value strong { display: block; font-size: 18px; }
+    .gate-value span { color: var(--muted); font-size: 10px; font-weight: 750; }
+    .gate-row .meter { margin: 13px 0 9px 54px; }
+    .gate-note { margin: 0 0 0 54px; color: var(--muted); font-size: 11px; line-height: 1.35; }
+    .and-marker { height: 0; position: relative; z-index: 2; text-align: center; }
+    .and-marker span { position: relative; top: -13px; display: inline-block; padding: 5px 9px; border: 2px solid var(--sticker-outline); border-radius: 999px; background: var(--paper-2); box-shadow: 2px 2px 0 var(--sticker-ink-shadow); font-size: 9px; font-weight: 900; }
+    .gate-verdict { display: flex; gap: 11px; align-items: center; padding: 15px 20px; border-top: 2px dashed var(--hairline); background: var(--paper-2); }
+    .verdict-icon { width: 34px; height: 34px; display: grid; flex: 0 0 auto; place-items: center; border: 2px solid var(--sticker-outline); border-radius: 50%; background: var(--mint); color: var(--mint-strong); box-shadow: 2px 2px 0 var(--sticker-ink-shadow); font-weight: 950; }
+    .tone-paused .verdict-icon { background: var(--danger-surface); color: var(--danger-ink); }
+    .gate-verdict strong { display: block; font-size: 13px; }
+    .gate-verdict span { display: block; margin-top: 2px; color: var(--muted); font-size: 11px; }
+
+    /* Variant B — two equal dials that visibly join. */
+    .dial-card { padding: 21px 18px 19px; }
+    .dial-status { text-align: center; }
+    .dial-status .status-copy { max-width: 300px; margin-inline: auto; }
+    .dials { display: grid; grid-template-columns: 1fr 34px 1fr; align-items: center; margin: 24px 0 20px; }
+    .join { display: grid; place-items: center; align-self: stretch; color: var(--muted); font-size: 9px; font-weight: 950; }
+    .join::before, .join::after { width: 1px; flex: 1; background: var(--hairline); content: ""; }
+    .dial-unit { text-align: center; }
+    .dial {
+      --fill: var(--mint-strong);
+      width: 112px;
+      height: 112px;
+      display: grid;
+      place-items: center;
+      margin: 0 auto 11px;
+      position: relative;
+      border-radius: 50%;
+      background: conic-gradient(var(--fill) calc(var(--value) * 1%), var(--hairline) 0);
+    }
+    .dial::after { position: absolute; inset: 9px; border-radius: 50%; background: var(--paper); content: ""; }
+    .dial-data { position: relative; z-index: 1; }
+    .dial-data strong { display: block; font-size: 24px; letter-spacing: -.045em; }
+    .dial-data span { color: var(--muted); font-size: 9px; font-weight: 800; }
+    .dial-unit.blocked .dial { --fill: var(--pink-strong); }
+    .dial-unit h3 { margin: 0; font-size: 13px; }
+    .dial-unit p { min-height: 30px; margin: 4px 0 0; color: var(--muted); font-size: 10px; line-height: 1.35; }
+    .next-window { padding: 14px; border: 2px solid var(--sticker-outline); border-radius: 15px; background: var(--paper-2); box-shadow: 3px 3px 0 var(--sticker-ink-shadow); text-align: center; }
+    .next-window strong { display: block; margin-top: 4px; font-size: 17px; }
+
+    .planner { margin: 24px 4px 0; padding: 18px; transform: rotate(.6deg); border: 2px solid #4b405e; border-radius: 15px; background: var(--yellow); color: var(--planner-ink); box-shadow: 4px 5px 0 var(--sticker-ink-shadow); }
+    .planner .eyebrow { color: var(--planner-muted); }
+    .planner-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 14px; }
+    .planner-head h3 { margin: 4px 0 0; font-size: 18px; }
+    .planner-head strong { color: var(--yellow-strong); font-size: 13px; }
+    .planner-facts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+    .planner-facts div { padding: 10px; border: 2px solid #635779; border-radius: 11px; background: var(--planner-panel); }
+    .planner-facts span { display: block; color: var(--planner-muted); font-size: 9px; font-weight: 850; text-transform: uppercase; }
+    .planner-facts strong { display: block; margin-top: 4px; font-size: 12px; line-height: 1.25; }
+
+    .app-tabbar {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4px;
+      margin: 28px auto 0;
+      padding: 6px 8px;
+      border: 1px solid var(--outline);
+      border-radius: 24px;
+      background: var(--tab);
+      box-shadow: 0 8px 28px var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+    .app-tab { display: grid; justify-items: center; gap: 3px; padding: 7px 4px; border: 0; border-radius: 17px; background: transparent; color: var(--muted); font-size: 10px; font-weight: 750; }
+    .app-tab .tab-icon { font-size: 20px; line-height: 1; }
+    .app-tab.active { background: color-mix(in srgb, var(--purple) 18%, transparent); color: var(--ink); }
+    .app-tab.active .tab-icon { color: var(--purple); }
+
+    .screen-heading { margin: 0 5px 20px; }
+    .screen-heading h2 { margin: 4px 0 6px; font-size: 29px; letter-spacing: -.04em; }
+    .screen-heading p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.45; }
+    .layout-options { display: grid; gap: 7px; padding: 4px 0 7px; }
+    .layout-option {
+      width: calc(100% - 30px);
+      position: relative;
+      display: grid;
+      grid-template-columns: 82px 1fr;
+      gap: 15px;
+      align-items: center;
+      padding: 16px;
+      border: 2px solid var(--sticker-outline);
+      border-radius: 19px;
+      cursor: pointer;
+      text-align: left;
+    }
+    .layout-option.bars { justify-self: start; transform: rotate(-1.5deg); background: var(--yellow); color: var(--planner-ink); box-shadow: 6px 7px 0 var(--sticker-ink-shadow); }
+    .layout-option.rings { justify-self: end; transform: rotate(1.4deg); background: var(--blue); color: var(--blue-ink); box-shadow: 6px 7px 0 var(--sticker-shadow); }
+    .layout-option[aria-pressed="true"] { z-index: 1; box-shadow: 8px 9px 0 var(--purple); }
+    .layout-copy strong { display: block; font-size: 24px; letter-spacing: -.025em; line-height: 1; text-transform: uppercase; }
+    .layout-copy span { display: block; margin-top: 6px; font-size: 10px; font-weight: 850; letter-spacing: .035em; text-transform: uppercase; }
+    .layout-option.bars .layout-copy span { color: var(--planner-muted); }
+    .layout-option.rings .layout-copy span { color: var(--blue-muted); }
+    .layout-check { width: 29px; height: 29px; position: absolute; top: -11px; right: -10px; display: grid; place-items: center; border: 2px solid var(--sticker-outline); border-radius: 50%; background: var(--pink); color: var(--ink); box-shadow: 2px 2px 0 var(--sticker-ink-shadow); font-size: 14px; font-weight: 950; transition: transform .15s ease; }
+    .layout-option[aria-pressed="false"] .layout-check { transform: scale(0); }
+    .layout-preview { height: 68px; display: grid; place-items: center; border: 2px solid currentColor; border-radius: 14px; background: rgb(255 255 255 / .3); overflow: hidden; }
+    .mini-ledger { width: 55px; display: grid; gap: 7px; }
+    .mini-ledger i { height: 10px; border: 2px solid currentColor; border-radius: 4px; background: linear-gradient(90deg, var(--pink-strong) 45%, rgb(255 255 255 / .38) 45%); }
+    .mini-ledger i:last-child { background: linear-gradient(90deg, var(--mint-strong) 82%, var(--hairline) 82%); }
+    .mini-rings { display: flex; gap: 7px; }
+    .mini-rings i { width: 30px; height: 30px; border: 6px solid var(--weekly-fill); border-right-color: rgb(255 255 255 / .4); border-radius: 50%; }
+    .mini-rings i:last-child { border-color: var(--mint-strong); border-top-color: var(--hairline); }
+    .layout-or { width: 40px; height: 30px; z-index: 2; display: grid; place-items: center; justify-self: center; margin: -2px 0 -3px; transform: rotate(-4deg); border: 2px solid var(--sticker-outline); border-radius: 999px; background: var(--paper); color: var(--ink); box-shadow: 2px 2px 0 var(--sticker-ink-shadow); font-size: 10px; font-weight: 950; }
+    .settings-note { margin: 18px 7px 0; padding: 10px 12px; transform: rotate(-.5deg); border: 2px dashed var(--sticker-outline); background: var(--paper); color: var(--muted); font-size: 11px; line-height: 1.4; }
+
+    .history-topline { display: flex; align-items: end; justify-content: space-between; gap: 12px; margin: 0 5px 16px; }
+    .history-topline h2 { margin: 4px 0 0; font-size: 27px; letter-spacing: -.04em; }
+    .history-range { padding: 7px 10px; transform: rotate(2deg); border: 2px solid var(--sticker-outline); border-radius: 9px; background: var(--yellow); color: var(--planner-ink); box-shadow: 3px 3px 0 var(--sticker-ink-shadow); font-size: 10px; font-weight: 900; }
+    .history-chart-card { padding: 18px 16px 16px; transform: rotate(-.45deg); }
+    .chart-kicker { color: var(--muted); font-size: 9px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
+    .chart-columns { height: 205px; display: flex; align-items: stretch; gap: 8px; margin-top: 10px; padding: 18px 7px 0; border-bottom: 2px solid var(--sticker-outline); background: repeating-linear-gradient(to bottom, transparent 0, transparent 48px, var(--hairline) 49px, transparent 50px); }
+    .chart-column { min-width: 0; flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 5px; }
+    .chart-column em { color: var(--muted); font-size: 7px; font-style: normal; font-weight: 900; }
+    .chart-bar { width: min(100%, 30px); height: var(--height); min-height: 16px; border: 2px solid var(--sticker-outline); border-radius: 7px 7px 3px 3px; background: var(--bar-color); box-shadow: 2px 0 0 var(--sticker-ink-shadow); }
+    .chart-column > span { padding-bottom: 6px; color: var(--muted); font-size: 8px; font-weight: 900; }
+    .history-stickers { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; margin: 20px 5px 0; }
+    .summary-sticker { min-height: 92px; display: flex; flex-direction: column; justify-content: space-between; padding: 14px; border: 2px solid var(--sticker-outline); border-radius: 15px; color: var(--ink); box-shadow: 4px 5px 0 var(--sticker-ink-shadow); }
+    .summary-sticker:first-child { transform: rotate(-1.7deg); background: var(--mint); }
+    .summary-sticker:last-child { transform: rotate(1.4deg); background: var(--pink); }
+    .summary-sticker span { font-size: 8px; font-weight: 900; letter-spacing: .06em; text-transform: uppercase; }
+    .summary-sticker strong { font-size: 17px; }
+    .history-footnote { margin: 20px 8px 0; color: var(--muted); font-size: 10px; line-height: 1.4; text-align: center; }
+
+    @media (min-width: 520px) {
+      .device { min-height: auto; margin-block: 28px 52px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <section class="prototype-controls" aria-label="Prototype data controls">
+    <div class="control-inner">
+      <div class="control-heading">
+        <p class="control-label">Prototype state — change the quota condition</p>
+        <button class="control-theme" id="themeToggle">◐ Theme</button>
+      </div>
+      <div class="state-picker">
+        <button data-state="ready">Both available</button>
+        <button data-state="weekly">Weekly empty</button>
+        <button data-state="short">5-hour empty</button>
+        <button data-state="both">Both empty</button>
+      </div>
+    </div>
+  </section>
+
+  <main class="device">
+    <header class="app-header">
+      <h1>SynView</h1>
+      <button class="header-button" id="reloadButton" aria-label="Reload quota data" title="Reload quota data">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5"></path><path d="M4.9 17A8 8 0 0 0 19.5 12M4 12A8 8 0 0 1 18.8 7"></path></svg>
+      </button>
+    </header>
+    <div class="sticker" id="pageSticker">TODAY’S CHECK-IN ✿</div>
+    <section id="variantRoot" aria-live="polite"></section>
+
+    <nav class="app-tabbar" aria-label="App tabs">
+      <button class="app-tab active" data-tab="current"><span class="tab-icon">◴</span><span>Current</span></button>
+      <button class="app-tab" data-tab="history"><span class="tab-icon">▥</span><span>History</span></button>
+      <button class="app-tab" data-tab="settings"><span class="tab-icon">⚙</span><span>Settings</span></button>
+    </nav>
+  </main>
+
+  <script>
+    const states = {
+      ready: {
+        tone: "ready",
+        status: "Ready when you are",
+        title: "",
+        copy: "",
+        weekly: { amount: "$18.66", total: "$48", percent: 39, note: "+$0.96 in 1h 42m", blocked: false },
+        short: { amount: "987", total: "1,000", percent: 99, note: "+50 every 15m", blocked: false },
+        next: "Next refill",
+        nextDetail: "+50 requests in 8m"
+      },
+      weekly: {
+        tone: "paused",
+        status: "Weekly credits refilling",
+        title: "",
+        copy: "+$0.96 every 3h 22m",
+        weekly: { amount: "$0.00", total: "$48", percent: 0, note: "+$0.96 in 1h 42m", blocked: true },
+        short: { amount: "987", total: "1,000", percent: 99, note: "Available, waiting on weekly", blocked: false, subdued: true },
+        next: "Next refill",
+        nextDetail: "+$0.96 in 1h 42m"
+      },
+      short: {
+        tone: "paused",
+        status: "Request limit refilling",
+        title: "",
+        copy: "+50 requests every 15m",
+        weekly: { amount: "$18.66", total: "$48", percent: 39, note: "Available, waiting on requests", blocked: false, subdued: true },
+        short: { amount: "0", total: "1,000", percent: 0, note: "+50 in 8m", blocked: true },
+        next: "Next refill",
+        nextDetail: "+50 requests in 8m"
+      },
+      both: {
+        tone: "paused",
+        status: "Both limits refilling",
+        title: "",
+        copy: "Requests: +50 every 15m · Weekly: +$0.96 every 3h 22m",
+        weekly: { amount: "$0.00", total: "$48", percent: 0, note: "+$0.96 in 1h 42m", blocked: true },
+        short: { amount: "0", total: "1,000", percent: 0, note: "+50 in 8m", blocked: true },
+        next: "Next refill",
+        nextDetail: "+50 requests in 8m"
+      }
+    };
+
+    const root = document.getElementById("variantRoot");
+    const pageSticker = document.getElementById("pageSticker");
+    const params = new URLSearchParams(location.search);
+    const requestedLayout = params.get("layout") || params.get("variant");
+    let usageLayout = ["gate", "dials"].includes(requestedLayout) ? requestedLayout : "gate";
+    let activeTab = ["current", "history", "settings"].includes(params.get("tab")) ? params.get("tab") : "current";
+    let stateKey = states[params.get("state")] ? params.get("state") : "ready";
+    let theme = params.get("theme") === "dark" ? "dark" : "light";
+
+    function meter(quota, color = "var(--mint-strong)") {
+      return `<div class="meter" style="--meter-color:${color}"><i style="--value:${quota.percent}%"></i></div>`;
+    }
+
+    function planner(data) {
+      const headline = "Weekly Reserve";
+      return `
+        <aside class="planner">
+          <div class="planner-head">
+            <div><span class="eyebrow">Weekly refill planner ✦</span><h3>${headline}</h3></div>
+            <strong>${data.weekly.percent}%</strong>
+          </div>
+          <div class="planner-facts">
+            <div><span>Next refill</span><strong>${data.weekly.note}</strong></div>
+            <div><span>Refill speed</span><strong>+$0.96 every 3h 22m</strong></div>
+          </div>
+        </aside>`;
+    }
+
+    function statusHeader(data) {
+      return `
+        <div class="status-pill">${data.status}</div>
+        ${data.title ? `<h2 class="status-title">${data.title}</h2>` : ""}
+        ${data.copy ? `<p class="status-copy">${data.copy}</p>` : ""}`;
+    }
+
+    function gateRow(kind, quota) {
+      const weekly = kind === "weekly";
+      return `
+        <div class="gate-row ${weekly ? "weekly" : "short"} ${quota.blocked ? "blocked" : ""} ${quota.subdued ? "subdued" : ""}">
+          <div class="gate-row-head">
+            <div class="quota-icon">${weekly ? "◇" : "◷"}</div>
+            <div><h3>${weekly ? "Weekly credits" : "Five-hour requests"}</h3><p>${weekly ? "Long-term spending budget" : "Short-term request capacity"}</p></div>
+            <div class="gate-value"><strong class="quota-number">${quota.amount}</strong><span>of ${quota.total}</span></div>
+          </div>
+          ${meter(quota, weekly ? "var(--weekly-fill)" : "var(--mint-strong)")}
+          <p class="gate-note">${quota.note}</p>
+        </div>`;
+    }
+
+    function variantGate(data) {
+      return `
+        <article class="card gate-ledger tone-${data.tone}">
+          <div class="gate-summary">${statusHeader(data)}</div>
+          ${gateRow("weekly", data.weekly)}
+          <div class="and-marker"><span>AND</span></div>
+          ${gateRow("short", data.short)}
+          <div class="gate-verdict"><div class="verdict-icon">◷</div><div><strong>${data.next}</strong><span>${data.nextDetail}</span></div></div>
+        </article>
+        ${planner(data)}`;
+    }
+
+    function dialUnit(labelText, quota, weekly) {
+      return `
+        <div class="dial-unit ${quota.blocked ? "blocked" : ""} ${quota.subdued ? "subdued" : ""}">
+          <div class="dial" style="--value:${quota.percent}"><div class="dial-data"><strong>${quota.percent}%</strong><span>${quota.amount} left</span></div></div>
+          <h3>${labelText}</h3>
+          <p>${quota.note}</p>
+        </div>`;
+    }
+
+    function variantDials(data) {
+      return `
+        <article class="card dial-card tone-${data.tone}">
+          <div class="dial-status">${statusHeader(data)}</div>
+          <div class="dials">
+            ${dialUnit("Weekly credits", data.weekly, true)}
+            <div class="join">AND</div>
+            ${dialUnit("5-hour requests", data.short, false)}
+          </div>
+          <div class="next-window"><span class="eyebrow">${data.next}</span><strong>${data.nextDetail}</strong></div>
+        </article>
+        ${planner(data)}`;
+    }
+
+    function layoutOption(key, name, description) {
+      const selected = usageLayout === key;
+      const preview = key === "gate"
+        ? `<div class="layout-preview"><span class="mini-ledger"><i></i><i></i></span></div>`
+        : `<div class="layout-preview"><span class="mini-rings"><i></i><i></i></span></div>`;
+      return `
+        <button class="layout-option ${key === "gate" ? "bars" : "rings"}" data-layout="${key}" aria-pressed="${selected}">
+          ${preview}
+          <span class="layout-copy"><strong>${name}</strong><span>${description}</span></span>
+          <span class="layout-check" aria-hidden="true">✓</span>
+        </button>`;
+    }
+
+    function settingsScreen() {
+      return `
+        <section class="settings-screen">
+          <div class="screen-heading">
+            <span class="eyebrow">Current screen</span>
+            <h2>Bars or rings?</h2>
+            <p>Same quota rules. Pick the view that feels best.</p>
+          </div>
+          <div class="layout-options" aria-label="Usage layout">
+            ${layoutOption("gate", "Bars", "Stacked + detailed")}
+            <span class="layout-or" aria-hidden="true">OR</span>
+            ${layoutOption("dials", "Rings", "Quick + visual")}
+          </div>
+          <p class="settings-note">This only changes the layout. Your balances and refill timing stay exactly the same.</p>
+        </section>`;
+    }
+
+    function historyScreen() {
+      const points = [
+        ["M", "$31", 76, "var(--mint)"],
+        ["T", "$29", 70, "var(--mint)"],
+        ["W", "$35", 86, "var(--mint)"],
+        ["T", "$19", 46, "var(--mint)"],
+        ["F", "$22", 55, "var(--mint)"],
+        ["S", "$25", 61, "var(--yellow)"],
+        ["S", "$19", 48, "var(--pink)"]
+      ];
+      const columns = points.map(([day, amount, height, color]) => `
+        <div class="chart-column">
+          <em>${amount}</em>
+          <i class="chart-bar" style="--height:${height}%;--bar-color:${color}"></i>
+          <span>${day}</span>
+        </div>`).join("");
+      return `
+        <div class="history-topline">
+          <div><span class="eyebrow">Your usage</span><h2>Weekly credits</h2></div>
+          <span class="history-range">7 DAYS</span>
+        </div>
+        <article class="card history-chart-card">
+          <span class="chart-kicker">Available credits</span>
+          <div class="chart-columns">${columns}</div>
+        </article>
+        <div class="history-stickers">
+          <div class="summary-sticker"><span>Least active day</span><strong>Wednesday</strong></div>
+          <div class="summary-sticker"><span>Most active day</span><strong>Thursday</strong></div>
+        </div>
+        <p class="history-footnote">History stays on this device and begins with your first check-in.</p>`;
+    }
+
+    function render() {
+      const data = states[stateKey];
+      document.documentElement.dataset.theme = theme;
+      root.innerHTML = activeTab === "settings"
+        ? settingsScreen()
+        : activeTab === "history"
+          ? historyScreen()
+          : usageLayout === "gate" ? variantGate(data) : variantDials(data);
+      pageSticker.textContent = activeTab === "settings" ? "PICK YOUR VIEW ✦" : activeTab === "history" ? "YOUR WEEK SO FAR ✿" : "TODAY’S CHECK-IN ✿";
+      document.querySelectorAll("[data-state]").forEach(button => button.classList.toggle("active", button.dataset.state === stateKey));
+      document.querySelectorAll("[data-tab]").forEach(button => {
+        const selected = button.dataset.tab === activeTab;
+        button.classList.toggle("active", selected);
+        if (selected) button.setAttribute("aria-current", "page");
+        else button.removeAttribute("aria-current");
+      });
+      params.delete("variant");
+      params.set("layout", usageLayout);
+      params.set("tab", activeTab);
+      params.set("state", stateKey);
+      params.set("theme", theme);
+      history.replaceState({}, "", `${location.pathname}?${params}`);
+    }
+
+    document.getElementById("themeToggle").addEventListener("click", () => { theme = theme === "light" ? "dark" : "light"; render(); });
+    document.getElementById("reloadButton").addEventListener("click", event => {
+      event.currentTarget.classList.add("refreshing");
+      setTimeout(() => event.currentTarget.classList.remove("refreshing"), 600);
+    });
+    document.querySelectorAll("[data-state]").forEach(button => button.addEventListener("click", () => { stateKey = button.dataset.state; render(); }));
+    document.querySelectorAll("[data-tab]").forEach(button => button.addEventListener("click", () => { activeTab = button.dataset.tab; render(); }));
+    root.addEventListener("click", event => {
+      const option = event.target.closest("[data-layout]");
+      if (!option) return;
+      usageLayout = option.dataset.layout;
+      render();
+    });
+
+    render();
+  </script>
+</body>
+</html>
