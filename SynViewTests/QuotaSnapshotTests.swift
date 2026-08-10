@@ -43,5 +43,11 @@ final class QuotaSnapshotTests: XCTestCase {
         XCTAssertEqual(quota.timeToReach(12, now: now), 77 * 60 + 6 * 202 * 60)
         XCTAssertEqual(quota.timeToReach(8, now: now), 0)
     }
-}
 
+    func testQuotaAccessRequiresBothLimits() {
+        XCTAssertEqual(QuotaAccessState(weeklyRemaining: 18, requestRemaining: 987), .ready)
+        XCTAssertEqual(QuotaAccessState(weeklyRemaining: 0, requestRemaining: 987), .weeklyRefilling)
+        XCTAssertEqual(QuotaAccessState(weeklyRemaining: 18, requestRemaining: 0), .requestsRefilling)
+        XCTAssertEqual(QuotaAccessState(weeklyRemaining: 0, requestRemaining: 0), .bothRefilling)
+    }
+}

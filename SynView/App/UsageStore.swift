@@ -104,8 +104,8 @@ final class UsageStore {
     #if DEBUG
     private static let sampleSnapshot = QuotaResponse(
         subscription: RequestQuota(limit: 1_000, requests: 0, renewsAt: "2026-08-09T18:41:11.774Z"),
-        weeklyTokenLimit: WeeklyTokenLimit(nextRegenAt: "2026-08-09T16:32:59.000Z", percentRemaining: 38.9, maxCredits: "$48.00", remainingCredits: "$18.66", nextRegenCredits: "$0.96"),
-        rollingFiveHourLimit: RollingFiveHourLimit(nextTickAt: "2026-08-09T14:07:57.000Z", tickPercent: 0.05, remaining: 987.4, max: 1_000, limited: false)
+        weeklyTokenLimit: WeeklyTokenLimit(nextRegenAt: Date.now.addingTimeInterval(102 * 60).ISO8601Format(), percentRemaining: 38.9, maxCredits: "$48.00", remainingCredits: "$18.66", nextRegenCredits: "$0.96"),
+        rollingFiveHourLimit: RollingFiveHourLimit(nextTickAt: Date.now.addingTimeInterval(8 * 60).ISO8601Format(), tickPercent: 0.05, remaining: 987.4, max: 1_000, limited: false)
     )
 
     private static let sampleHistory: [DailySnapshot] = zip(0..<7, [31.20, 28.80, 34.56, 19.20, 22.08, 24.96, 18.66]).map { offset, credits in
