@@ -27,7 +27,7 @@ struct SetupView: View {
                         Text("See what's ready")
                             .font(.system(.largeTitle, design: .rounded, weight: .bold))
                             .accessibilityAddTraits(.isHeader)
-                        Text("Track your Synthetic limits, refills, and history from your phone.")
+                        Text("Track your Synthetic limits, refills, and history from your device.")
                             .foregroundStyle(Color.synMuted)
                             .multilineTextAlignment(.center)
                             .fixedSize(horizontal: false, vertical: true)
