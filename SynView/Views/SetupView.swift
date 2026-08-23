@@ -73,6 +73,8 @@ struct SetupView: View {
                     Spacer(minLength: 20)
                 }
                 .padding(24)
+                .frame(maxWidth: 700)
+                .frame(maxWidth: .infinity)
             }
             .scrollDismissesKeyboard(.interactively)
         }

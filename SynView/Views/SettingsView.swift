@@ -31,6 +31,8 @@ struct SettingsView: View {
             appearanceCard
             apiKeyCard
         }
+        .frame(maxWidth: 700)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var layoutCard: some View {

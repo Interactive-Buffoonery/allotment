@@ -174,6 +174,7 @@ private struct CurrentUsageView: View {
     let now: Date
     let refresh: () -> Void
     @AppStorage(UsageLayout.storageKey) private var storedLayout = UsageLayout.bars.rawValue
+    @Environment(\.horizontalSizeClass) private var sizeClass
 
     private var layout: UsageLayout { UsageLayout(rawValue: storedLayout) ?? .bars }
 
@@ -192,12 +193,15 @@ private struct CurrentUsageView: View {
 
             if let rolling = snapshot.rollingFiveHourLimit,
                let weekly = snapshot.weeklyTokenLimit {
-                if layout == .bars {
-                    QuotaBarsCard(weekly: weekly, rolling: rolling, lastUpdated: lastUpdated, now: now)
+                if sizeClass == .regular {
+                    HStack(alignment: .top, spacing: 24) {
+                        quotaCard(weekly: weekly, rolling: rolling)
+                        WeeklyPlannerCard(limit: weekly, now: now)
+                    }
                 } else {
-                    QuotaRingsCard(weekly: weekly, rolling: rolling, lastUpdated: lastUpdated, now: now)
+                    quotaCard(weekly: weekly, rolling: rolling)
+                    WeeklyPlannerCard(limit: weekly, now: now)
                 }
-                WeeklyPlannerCard(limit: weekly, now: now)
             } else if let subscription = snapshot.subscription {
                 LegacyLedgerCard(quota: subscription, lastUpdated: lastUpdated)
             } else {
@@ -206,6 +210,16 @@ private struct CurrentUsageView: View {
                     retry: refresh,
                     isError: true
                 )
+            }
+        }
+    }
+
+    private func quotaCard(weekly: WeeklyTokenLimit, rolling: RollingFiveHourLimit) -> some View {
+        Group {
+            if layout == .bars {
+                QuotaBarsCard(weekly: weekly, rolling: rolling, lastUpdated: lastUpdated, now: now)
+            } else {
+                QuotaRingsCard(weekly: weekly, rolling: rolling, lastUpdated: lastUpdated, now: now)
             }
         }
     }
