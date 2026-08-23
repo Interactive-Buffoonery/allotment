@@ -12,19 +12,35 @@ struct RequestQuota: Decodable, Sendable {
     let renewsAt: String
 }
 
-struct WeeklyTokenLimit: Decodable, Sendable {
+struct WeeklyTokenLimit: Decodable, Sendable, Equatable {
     static let regenerationInterval: TimeInterval = 202 * 60
 
-    let nextRegenAt: String
+    let nextRefillDate: Date?
     let percentRemaining: Double
-    let maxCredits: String
-    let remainingCredits: String
-    let nextRegenCredits: String
+    let maximum: Double
+    let remaining: Double
+    let refillAmount: Double
 
-    var maximum: Double { maxCredits.currencyValue }
-    var remaining: Double { remainingCredits.currencyValue }
-    var refillAmount: Double { nextRegenCredits.currencyValue }
-    var nextRefillDate: Date? { nextRegenAt.iso8601Date }
+    init(nextRegenAt: String, percentRemaining: Double, maxCredits: String, remainingCredits: String, nextRegenCredits: String) {
+        self.nextRefillDate = nextRegenAt.iso8601Date
+        self.percentRemaining = percentRemaining
+        self.maximum = maxCredits.currencyValue
+        self.remaining = remainingCredits.currencyValue
+        self.refillAmount = nextRegenCredits.currencyValue
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        self.nextRefillDate = try c.decode(String.self, forKey: .nextRegenAt).iso8601Date
+        self.percentRemaining = try c.decode(Double.self, forKey: .percentRemaining)
+        self.maximum = try c.decode(String.self, forKey: .maxCredits).currencyValue
+        self.remaining = try c.decode(String.self, forKey: .remainingCredits).currencyValue
+        self.refillAmount = try c.decode(String.self, forKey: .nextRegenCredits).currencyValue
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case nextRegenAt, percentRemaining, maxCredits, remainingCredits, nextRegenCredits
+    }
 
     func timeToReach(_ target: Double, now: Date = .now) -> TimeInterval {
         guard target > remaining, refillAmount > 0 else { return 0 }
@@ -34,17 +50,37 @@ struct WeeklyTokenLimit: Decodable, Sendable {
     }
 }
 
-struct RollingFiveHourLimit: Decodable, Sendable {
+struct RollingFiveHourLimit: Decodable, Sendable, Equatable {
     static let regenerationInterval: TimeInterval = 15 * 60
 
-    let nextTickAt: String
+    let nextTickDate: Date?
     let tickPercent: Double
     let remaining: Double
     let max: Double
     let limited: Bool
 
-    var nextTickDate: Date? { nextTickAt.iso8601Date }
     var refillAmount: Double { max * tickPercent }
+
+    init(nextTickAt: String, tickPercent: Double, remaining: Double, max: Double, limited: Bool) {
+        self.nextTickDate = nextTickAt.iso8601Date
+        self.tickPercent = tickPercent
+        self.remaining = remaining
+        self.max = max
+        self.limited = limited
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        self.nextTickDate = try c.decode(String.self, forKey: .nextTickAt).iso8601Date
+        self.tickPercent = try c.decode(Double.self, forKey: .tickPercent)
+        self.remaining = try c.decode(Double.self, forKey: .remaining)
+        self.max = try c.decode(Double.self, forKey: .max)
+        self.limited = try c.decode(Bool.self, forKey: .limited)
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case nextTickAt, tickPercent, remaining, max, limited
+    }
 }
 
 struct DailySnapshot: Codable, Identifiable, Sendable {
@@ -58,7 +94,8 @@ struct DailySnapshot: Codable, Identifiable, Sendable {
 
 extension String {
     var currencyValue: Double {
-        Double(filter { $0.isNumber || $0 == "." || $0 == "-" }) ?? 0
+        let stripped = filter { $0.isASCII && ($0.isNumber || $0 == "." || $0 == "-") }
+        return Double(stripped) ?? 0
     }
 
     var iso8601Date: Date? {

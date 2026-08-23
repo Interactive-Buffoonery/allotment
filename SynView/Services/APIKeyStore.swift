@@ -27,11 +27,14 @@ struct APIKeyStore: Sendable {
             kSecAttrService as String: service,
             kSecAttrAccount as String: account,
         ]
-        let attributes = [kSecValueData as String: data]
+        let attributes: [String: Any] = [
+            kSecValueData as String: data,
+            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly,
+        ]
         let status = SecItemUpdate(query as CFDictionary, attributes as CFDictionary)
         if status == errSecItemNotFound {
             var item = query
-            item[kSecValueData as String] = data
+            item.merge(attributes) { _, new in new }
             guard SecItemAdd(item as CFDictionary, nil) == errSecSuccess else {
                 throw KeyStoreError.writeFailed
             }

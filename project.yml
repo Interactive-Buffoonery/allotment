@@ -9,8 +9,8 @@ settings:
     DEVELOPMENT_TEAM: 7CNK4YPCQX
     CODE_SIGN_STYLE: Automatic
     GENERATE_INFOPLIST_FILE: YES
-    CURRENT_PROJECT_VERSION: 1
-    MARKETING_VERSION: 1.0
+    CURRENT_PROJECT_VERSION: 3
+    MARKETING_VERSION: 0.1.2
 targets:
   SynView:
     type: application
@@ -24,8 +24,6 @@ targets:
         UIApplicationSceneManifest:
           UIApplicationSupportsMultipleScenes: false
         UILaunchScreen: {}
-        UIAppFonts:
-          - LilitaOne-Regular.ttf
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.interactivebuffoonery.synview

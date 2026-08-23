@@ -12,51 +12,51 @@ struct DashboardView: View {
     @State private var selectedTab = AppTab.current
 
     var body: some View {
-        TabView(selection: $selectedTab) {
-            NavigationStack {
-                page {
-                    VStack(alignment: .leading, spacing: 24) {
-                        CurrentHeader(store: store)
-                        CurrentUsageContent(store: store)
+        ZStack {
+            DotBackground()
+            TabView(selection: $selectedTab) {
+                NavigationStack {
+                    page {
+                        VStack(alignment: .leading, spacing: 24) {
+                            CurrentHeader(store: store)
+                            CurrentUsageContent(store: store)
+                        }
                     }
+                    .refreshable { await store.refresh() }
+                    .toolbar(.hidden, for: .navigationBar)
                 }
-                .refreshable { await store.refresh() }
-                .toolbar(.hidden, for: .navigationBar)
-            }
-            .tabItem { Label("Current", systemImage: "gauge.with.dots.needle.50percent") }
-            .tag(AppTab.current)
+                .tabItem { Label("Current", systemImage: "gauge.with.dots.needle.50percent") }
+                .tag(AppTab.current)
 
-            NavigationStack {
-                page { UsageHistoryView(history: store.history) }
-                    .toolbar(.hidden, for: .navigationBar)
-            }
-            .tabItem { Label("History", systemImage: "chart.bar.fill") }
-            .tag(AppTab.history)
+                NavigationStack {
+                    page { UsageHistoryView(history: store.history) }
+                        .toolbar(.hidden, for: .navigationBar)
+                }
+                .tabItem { Label("History", systemImage: "chart.bar.fill") }
+                .tag(AppTab.history)
 
-            NavigationStack {
-                page { SettingsView(store: store) }
-                    .toolbar(.hidden, for: .navigationBar)
+                NavigationStack {
+                    page { SettingsView(store: store) }
+                        .toolbar(.hidden, for: .navigationBar)
+                }
+                .tabItem { Label("Settings", systemImage: "gearshape.fill") }
+                .tag(AppTab.settings)
             }
-            .tabItem { Label("Settings", systemImage: "gearshape.fill") }
-            .tag(AppTab.settings)
-        }
-        .tint(.synPurple)
-        .toolbarBackground(Color.synPaper, for: .tabBar)
-        .toolbarBackground(.visible, for: .tabBar)
-        .task {
-            if store.snapshot == nil { await store.refresh() }
+            .tint(.synPurple)
+            .toolbarBackground(Color.synPaper, for: .tabBar)
+            .toolbarBackground(.visible, for: .tabBar)
+            .task {
+                if store.snapshot == nil { await store.refresh() }
+            }
         }
     }
 
     private func page<Content: View>(@ViewBuilder content: () -> Content) -> some View {
-        ZStack {
-            DotBackground()
-            ScrollView {
-                content()
-                    .padding(.horizontal, 18)
-                    .padding(.top, 14)
-                    .padding(.bottom, 32)
-            }
+        ScrollView {
+            content()
+                .padding(.horizontal, 18)
+                .padding(.top, 14)
+                .padding(.bottom, 32)
         }
         .foregroundStyle(Color.synInk)
     }
@@ -67,9 +67,16 @@ private struct CurrentHeader: View {
 
     var body: some View {
         HStack(alignment: .center) {
-            Text("SynView")
-                .font(.synWordmark(size: 48))
-                .accessibilityAddTraits(.isHeader)
+            VStack(alignment: .leading, spacing: 3) {
+                Text("SynView")
+                    .font(.synWordmark(size: 44))
+                    .accessibilityAddTraits(.isHeader)
+                Text("QUOTA NOTEBOOK")
+                    .font(.caption.bold())
+                    .tracking(0.6)
+                    .foregroundStyle(Color.synMuted)
+                    .accessibilityHidden(true)
+            }
 
             Spacer()
 
@@ -79,15 +86,15 @@ private struct CurrentHeader: View {
                 Image(systemName: "arrow.clockwise")
                     .font(.system(size: 20, weight: .black))
                     .foregroundStyle(Color.synPlannerInk)
-                    .frame(width: 49, height: 49)
+                    .frame(width: 47, height: 47)
                     .background(Color.synYellow)
                     .clipShape(Circle())
                     .background {
                         Circle()
-                            .fill(Color.synShadow)
-                            .offset(x: 4, y: 5)
+                            .fill(Color.synInkShadow)
+                            .offset(x: 3, y: 3)
                     }
-                    .overlay(Circle().strokeBorder(Color.synOutline, lineWidth: 2.25))
+                    .overlay(Circle().strokeBorder(Color.synOutline, lineWidth: 2))
             }
             .buttonStyle(.plain)
             .disabled(store.isLoading)
@@ -101,10 +108,26 @@ private struct CurrentHeader: View {
 private struct CurrentUsageContent: View {
     let store: UsageStore
 
-    @ViewBuilder
     var body: some View {
         if let snapshot = store.snapshot {
-            CurrentUsageView(snapshot: snapshot, lastUpdated: store.lastUpdated)
+            TimelineView(.periodic(from: .now, by: 60)) { context in
+                VStack(alignment: .leading, spacing: 24) {
+                    if store.errorMessage != nil {
+                        StaleDataBanner()
+                    }
+                    CurrentUsageView(
+                        snapshot: snapshot,
+                        lastUpdated: store.lastUpdated,
+                        now: context.date,
+                        refresh: { Task { await store.refresh() } }
+                    )
+                }
+                .task(id: isRefillDue(snapshot: snapshot, now: context.date)) {
+                    if isRefillDue(snapshot: snapshot, now: context.date), !store.isLoading {
+                        await store.refresh()
+                    }
+                }
+            }
         } else if store.isLoading {
             ProgressView("Checking Synthetic…")
                 .font(.system(.body, design: .rounded))
@@ -113,41 +136,76 @@ private struct CurrentUsageContent: View {
                 .frame(maxWidth: .infinity)
                 .padding(.top, 70)
         } else {
-            EmptyUsageView(message: store.errorMessage ?? "No quota data is available yet.") {
-                Task { await store.refresh() }
-            }
+            EmptyUsageView(
+                message: store.errorMessage ?? "No quota data is available yet.",
+                retry: { Task { await store.refresh() } },
+                isError: store.errorMessage != nil
+            )
         }
+    }
+
+    private func isRefillDue(snapshot: QuotaResponse, now: Date) -> Bool {
+        let weekly = snapshot.weeklyTokenLimit?.nextRefillDate ?? .distantFuture
+        let rolling = snapshot.rollingFiveHourLimit?.nextTickDate ?? .distantFuture
+        return weekly < now || rolling < now
+    }
+}
+
+private struct StaleDataBanner: View {
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .accessibilityHidden(true)
+            Text("Couldn't refresh — showing last known data.")
+                .font(.caption.bold())
+        }
+        .foregroundStyle(Color.synError)
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.synError.opacity(0.12))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(Color.synError.opacity(0.4), lineWidth: 1.5))
     }
 }
 
 private struct CurrentUsageView: View {
     let snapshot: QuotaResponse
     let lastUpdated: Date?
+    let now: Date
+    let refresh: () -> Void
     @AppStorage(UsageLayout.storageKey) private var storedLayout = UsageLayout.bars.rawValue
 
     private var layout: UsageLayout { UsageLayout(rawValue: storedLayout) ?? .bars }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 24) {
-            Text("TODAY’S CHECK-IN ✿")
+            Text("TODAY'S CHECK-IN ✿")
                 .font(.system(.headline, design: .rounded, weight: .black))
                 .tracking(0.5)
                 .padding(.horizontal, 17)
                 .padding(.vertical, 11)
                 .background(Color.synPink)
-                .stickerBorder(cornerRadius: 10, offset: 5)
-                .rotationEffect(.degrees(-1.5))
+                .stickerBorder(shadow: .synInkShadow, cornerRadius: 10, offset: 5)
+                .rotationEffect(.degrees(-2))
+                .accessibilityLabel("Today's check-in")
+                .accessibilityAddTraits(.isHeader)
 
             if let rolling = snapshot.rollingFiveHourLimit,
                let weekly = snapshot.weeklyTokenLimit {
                 if layout == .bars {
-                    QuotaBarsCard(weekly: weekly, rolling: rolling, lastUpdated: lastUpdated)
+                    QuotaBarsCard(weekly: weekly, rolling: rolling, lastUpdated: lastUpdated, now: now)
                 } else {
-                    QuotaRingsCard(weekly: weekly, rolling: rolling, lastUpdated: lastUpdated)
+                    QuotaRingsCard(weekly: weekly, rolling: rolling, lastUpdated: lastUpdated, now: now)
                 }
-                WeeklyPlannerCard(limit: weekly)
+                WeeklyPlannerCard(limit: weekly, now: now)
             } else if let subscription = snapshot.subscription {
                 LegacyLedgerCard(quota: subscription, lastUpdated: lastUpdated)
+            } else {
+                EmptyUsageView(
+                    message: "Synthetic didn't return any quota details.",
+                    retry: refresh,
+                    isError: true
+                )
             }
         }
     }
@@ -157,12 +215,17 @@ private struct QuotaBarsCard: View {
     let weekly: WeeklyTokenLimit
     let rolling: RollingFiveHourLimit
     let lastUpdated: Date?
+    let now: Date
 
     private var state: QuotaAccessState {
         QuotaAccessState(weeklyRemaining: weekly.remaining, requestRemaining: rolling.remaining)
     }
 
     var body: some View {
+        let weeklyRemainingUSD = weekly.remaining.formatted(.currency(code: "USD"))
+        let weeklyMaximumUSD = weekly.maximum.formatted(.currency(code: "USD"))
+        let weeklyRefillUSD = weekly.refillAmount.formatted(.currency(code: "USD"))
+
         VStack(spacing: 0) {
             GateStatusBadge(state: state)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -176,11 +239,11 @@ private struct QuotaBarsCard: View {
                 iconForeground: .synPlannerInk,
                 title: "Weekly credits",
                 subtitle: "Long-term spending budget",
-                value: weekly.remaining.formatted(.currency(code: "USD")),
-                maximum: "of \(weekly.maximum.formatted(.currency(code: "USD")))",
+                value: weeklyRemainingUSD,
+                maximum: "of \(weeklyMaximumUSD)",
                 progress: ratio(weekly.remaining, weekly.maximum),
                 fill: .synWeeklyFill,
-                refill: "+\(weekly.refillAmount.formatted(.currency(code: "USD"))) every 3h 22m"
+                refill: "+\(weeklyRefillUSD) every 3h 22m"
             )
 
             AndBadge()
@@ -200,7 +263,7 @@ private struct QuotaBarsCard: View {
             )
 
             DashedDivider()
-            NextRefillBand(weekly: weekly, rolling: rolling, lastUpdated: lastUpdated)
+            NextRefillBand(weekly: weekly, rolling: rolling, lastUpdated: lastUpdated, now: now)
         }
         .background(Color.synPaper)
         .stickerBorder(cornerRadius: 24, offset: 7)
@@ -261,29 +324,30 @@ private struct SegmentedQuotaBar: View {
     let fill: Color
 
     var body: some View {
-        GeometryReader { proxy in
-            ZStack(alignment: .leading) {
-                RoundedRectangle(cornerRadius: 6)
-                    .fill(Color.synInk.opacity(0.11))
+        Canvas { context, size in
+            let clamped = min(max(progress, 0), 1)
+            let fillWidth = size.width * clamped
 
-                Rectangle()
-                    .fill(fill)
-                    .frame(width: proxy.size.width * min(max(progress, 0), 1))
+            context.fill(Path(CGRect(origin: .zero, size: size)), with: .color(Color.synInk.opacity(0.11)))
 
-                HStack(spacing: 0) {
-                    ForEach(1..<10, id: \.self) { _ in
-                        Spacer()
-                        Rectangle()
-                            .fill(Color.synOutline.opacity(0.54))
-                            .frame(width: 1.5)
-                    }
-                    Spacer()
-                }
+            if fillWidth > 0 {
+                var fillRect = CGRect(origin: .zero, size: size)
+                fillRect.size.width = fillWidth
+                context.fill(Path(fillRect), with: .color(fill))
             }
-            .clipShape(RoundedRectangle(cornerRadius: 6))
-            .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(Color.synOutline, lineWidth: 2))
+
+            let segmentWidth = size.width / 10
+            for i in 1..<10 {
+                let x = segmentWidth * CGFloat(i)
+                var path = Path()
+                path.move(to: CGPoint(x: x, y: 0))
+                path.addLine(to: CGPoint(x: x, y: size.height))
+                context.stroke(path, with: .color(Color.synOutline.opacity(0.54)), lineWidth: 1.5)
+            }
         }
         .frame(height: 18)
+        .clipShape(RoundedRectangle(cornerRadius: 6))
+        .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(Color.synOutline, lineWidth: 2))
     }
 }
 
@@ -291,12 +355,20 @@ private struct QuotaRingsCard: View {
     let weekly: WeeklyTokenLimit
     let rolling: RollingFiveHourLimit
     let lastUpdated: Date?
+    let now: Date
+    @Environment(\.horizontalSizeClass) private var sizeClass
 
     private var state: QuotaAccessState {
         QuotaAccessState(weeklyRemaining: weekly.remaining, requestRemaining: rolling.remaining)
     }
 
+    private var ringSize: CGFloat { sizeClass == .compact ? 94 : 114 }
+
     var body: some View {
+        let weeklyMaximumUSD = weekly.maximum.formatted(.currency(code: "USD"))
+        let weeklyRemainingUSD = weekly.remaining.formatted(.currency(code: "USD"))
+        let weeklyRefillUSD = weekly.refillAmount.formatted(.currency(code: "USD"))
+
         VStack(spacing: 0) {
             GateStatusBadge(state: state)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -307,16 +379,17 @@ private struct QuotaRingsCard: View {
             HStack(alignment: .top, spacing: 8) {
                 QuotaRing(
                     title: "Weekly credits",
-                    subtitle: "of \(weekly.maximum.formatted(.currency(code: "USD")))",
-                    value: weekly.remaining.formatted(.currency(code: "USD")),
+                    subtitle: "of \(weeklyMaximumUSD)",
+                    value: weeklyRemainingUSD,
                     progress: ratio(weekly.remaining, weekly.maximum),
                     color: .synWeeklyFill,
-                    refill: "+\(weekly.refillAmount.formatted(.currency(code: "USD"))) / 3h 22m"
+                    refill: "+\(weeklyRefillUSD) / 3h 22m",
+                    size: ringSize
                 )
 
                 AndBadge()
                     .rotationEffect(.degrees(-4))
-                    .padding(.top, 51)
+                    .padding(.top, sizeClass == .compact ? 42 : 51)
 
                 QuotaRing(
                     title: "Five-hour requests",
@@ -324,17 +397,19 @@ private struct QuotaRingsCard: View {
                     value: format(rolling.remaining),
                     progress: ratio(rolling.remaining, rolling.max),
                     color: .synRequestFill,
-                    refill: "+\(format(rolling.refillAmount)) / 15m"
+                    refill: "+\(format(rolling.refillAmount)) / 15m",
+                    size: ringSize
                 )
             }
             .padding(.horizontal, 13)
             .padding(.vertical, 22)
 
             DashedDivider()
-            NextRefillBand(weekly: weekly, rolling: rolling, lastUpdated: lastUpdated)
+            NextRefillBand(weekly: weekly, rolling: rolling, lastUpdated: lastUpdated, now: now)
         }
         .background(Color.synPaper)
         .stickerBorder(cornerRadius: 24, offset: 7)
+        .accessibilityElement(children: .contain)
     }
 }
 
@@ -345,6 +420,7 @@ private struct QuotaRing: View {
     let progress: Double
     let color: Color
     let refill: String
+    var size: CGFloat = 114
 
     var body: some View {
         VStack(spacing: 10) {
@@ -359,15 +435,15 @@ private struct QuotaRing: View {
                 VStack(spacing: 1) {
                     Text(value)
                         .font(.system(.headline, design: .rounded, weight: .black))
-                        .minimumScaleFactor(0.65)
+                        .minimumScaleFactor(0.5)
                         .lineLimit(1)
                     Text(subtitle)
                         .font(.caption2.bold())
                         .foregroundStyle(Color.synMuted)
                 }
-                .padding(13)
+                .padding(10)
             }
-            .frame(width: 114, height: 114)
+            .frame(width: size, height: size)
 
             Text(title)
                 .font(.system(.subheadline, design: .rounded, weight: .bold))
@@ -393,7 +469,7 @@ private struct GateStatusBadge: View {
             Circle()
                 .fill(state.isReady ? Color.synRequestFill : Color.synWeeklyFill)
                 .frame(width: 12, height: 12)
-                .overlay(Circle().stroke(Color.synOutline.opacity(0.45), lineWidth: 1))
+                .overlay(Circle().strokeBorder(Color.synOutline.opacity(0.45), lineWidth: 1))
             Text(state.title.uppercased())
                 .font(.system(.subheadline, design: .rounded, weight: .black))
                 .tracking(0.7)
@@ -402,7 +478,7 @@ private struct GateStatusBadge: View {
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
         .background(state.isReady ? Color.synMint : Color.synYellow)
-        .notebookOutline(cornerRadius: 22)
+        .stickerBorder(shadow: .synInkShadow, cornerRadius: 22, offset: 3)
         .accessibilityElement(children: .combine)
     }
 }
@@ -415,7 +491,7 @@ private struct AndBadge: View {
             .padding(.horizontal, 13)
             .padding(.vertical, 7)
             .background(Color.synPaper)
-            .notebookOutline(cornerRadius: 18)
+            .stickerBorder(shadow: .synInkShadow, cornerRadius: 18, offset: 3)
             .accessibilityHidden(true)
     }
 }
@@ -424,39 +500,45 @@ private struct NextRefillBand: View {
     let weekly: WeeklyTokenLimit
     let rolling: RollingFiveHourLimit
     let lastUpdated: Date?
+    let now: Date
 
     var body: some View {
-        TimelineView(.periodic(from: .now, by: 60)) { context in
-            HStack(spacing: 13) {
-                Stamp(icon: "clock.arrow.circlepath", color: .synMint, size: 46)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("NEXT REFILL")
-                        .font(.caption2.bold())
-                        .foregroundStyle(Color.synMuted)
-                    Text(nextRefillText(now: context.date))
-                        .font(.system(.subheadline, design: .rounded, weight: .bold))
-                }
-                Spacer()
-                if let lastUpdated {
-                    Text(lastUpdated, format: .dateTime.hour().minute())
-                        .font(.caption2.bold())
-                        .foregroundStyle(Color.synMuted)
-                        .accessibilityLabel("Last checked \(lastUpdated.formatted(date: .omitted, time: .shortened))")
-                }
+        HStack(spacing: 13) {
+            Stamp(icon: "clock.arrow.circlepath", color: .synMint, size: 46)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("NEXT REFILL")
+                    .font(.caption2.bold())
+                    .foregroundStyle(Color.synMuted)
+                Text(nextRefillText(now: now))
+                    .font(.system(.subheadline, design: .rounded, weight: .bold))
             }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 16)
-            .background(Color.synPurple.opacity(0.10))
+            Spacer()
+            if let lastUpdated {
+                Text(lastUpdated, format: lastUpdatedFormat(lastUpdated))
+                    .font(.caption2.bold())
+                    .foregroundStyle(Color.synMuted)
+                    .accessibilityLabel("Last checked \(lastUpdated.formatted(date: .abbreviated, time: .shortened))")
+            }
         }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 16)
+        .background(Color.synPurple.opacity(0.10))
+    }
+
+    private func lastUpdatedFormat(_ date: Date) -> Date.FormatStyle {
+        if Calendar.current.isDateInToday(date) {
+            return .dateTime.hour().minute()
+        }
+        return .dateTime.hour().minute().month().day()
     }
 
     private func nextRefillText(now: Date) -> String {
         let weeklyDate = weekly.nextRefillDate ?? .distantFuture
         let rollingDate = rolling.nextTickDate ?? .distantFuture
         if weeklyDate < rollingDate {
-            return "+\(weekly.refillAmount.formatted(.currency(code: "USD"))) in \(countdown(to: weeklyDate, now: now))"
+            return refillDueText(amount: weekly.refillAmount.formatted(.currency(code: "USD")), date: weekly.nextRefillDate, now: now)
         }
-        return "+\(format(rolling.refillAmount)) requests in \(countdown(to: rollingDate, now: now))"
+        return refillDueText(amount: format(rolling.refillAmount), date: rolling.nextTickDate, now: now)
     }
 }
 
@@ -487,71 +569,102 @@ private struct LegacyLedgerCard: View {
 
 private struct WeeklyPlannerCard: View {
     let limit: WeeklyTokenLimit
+    let now: Date
     @State private var target: Double
 
-    init(limit: WeeklyTokenLimit) {
+    init(limit: WeeklyTokenLimit, now: Date) {
         self.limit = limit
+        self.now = now
         _target = State(initialValue: min(limit.maximum, limit.remaining + limit.refillAmount * 8))
     }
 
     var body: some View {
-        TimelineView(.periodic(from: .now, by: 60)) { context in
-            VStack(alignment: .leading, spacing: 15) {
-                Text("WEEKLY REFILL PLANNER ✦")
-                    .font(.caption.bold())
-                    .tracking(0.7)
+        let remainingUSD = limit.remaining.formatted(.currency(code: "USD"))
+        let maximumUSD = limit.maximum.formatted(.currency(code: "USD"))
+        let refillUSD = limit.refillAmount.formatted(.currency(code: "USD"))
 
-                HStack(alignment: .firstTextBaseline) {
-                    Text("Weekly Reserve")
+        VStack(alignment: .leading, spacing: 15) {
+            Text("WEEKLY REFILL PLANNER ✦")
+                .font(.caption.bold())
+                .tracking(0.7)
+                .accessibilityLabel("Weekly refill planner")
+                .accessibilityAddTraits(.isHeader)
+
+            HStack(alignment: .bottom) {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("AVAILABLE NOW")
+                        .font(.caption2.bold())
+                        .foregroundStyle(Color.synPlannerInk.opacity(0.85))
+                    Text(remainingUSD)
                         .font(.system(.title2, design: .rounded, weight: .black))
-                    Spacer()
-                    Text(percent(limit.percentRemaining / 100))
-                        .font(.system(.subheadline, design: .rounded, weight: .black))
+                    Text("of \(maximumUSD)")
+                        .font(.caption.bold())
+                        .foregroundStyle(Color.synPlannerInk.opacity(0.85))
                 }
-
-                Text("Weekly credits refill by \(limit.refillAmount.formatted(.currency(code: "USD"))) every 3h 22m.")
-                    .font(.system(.subheadline, design: .rounded, weight: .semibold))
-
-                HStack(spacing: 9) {
-                    RefillFact(
-                        label: "NEXT REFILL",
-                        value: "+\(limit.refillAmount.formatted(.currency(code: "USD"))) in \(countdown(to: limit.nextRefillDate, now: context.date))"
-                    )
-                    RefillFact(
-                        label: "AVAILABLE NOW",
-                        value: limit.remaining.formatted(.currency(code: "USD"))
-                    )
-                }
-
-                if limit.remaining < limit.maximum, limit.refillAmount > 0 {
-                    DashedDivider(color: Color.synPlannerInk.opacity(0.34))
-
-                    HStack {
-                        Text("Target reserve")
-                            .font(.subheadline.bold())
-                        Spacer()
-                        Text(target, format: .currency(code: "USD"))
-                            .font(.system(.headline, design: .rounded, weight: .black))
-                    }
-
-                    Slider(value: $target, in: limit.remaining...limit.maximum, step: limit.refillAmount)
-                        .tint(.synPurple)
-                        .accessibilityLabel("Target weekly reserve")
-
-                    Label(
-                        "About \(duration(limit.timeToReach(target, now: context.date))) without new usage",
-                        systemImage: "clock"
-                    )
-                    .font(.system(.subheadline, design: .rounded, weight: .semibold))
-                }
+                Spacer()
+                let pct = percent(limit.percentRemaining / 100)
+                Text(pct)
+                    .font(.system(.subheadline, design: .rounded, weight: .black))
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 7)
+                    .background(Color.synMint)
+                    .stickerBorder(shadow: .synInkShadow, cornerRadius: 9, offset: 3)
+                    .rotationEffect(.degrees(2))
+                    .accessibilityLabel("\(pct) remaining")
             }
-            .foregroundStyle(Color.synPlannerInk)
-            .padding(19)
-            .background(Color.synYellow)
-            .stickerBorder(cornerRadius: 20, offset: 7)
+
+            HStack(spacing: 9) {
+                RefillFact(
+                    label: "NEXT REFILL",
+                    value: refillDueText(amount: refillUSD, date: limit.nextRefillDate, now: now)
+                )
+                RefillFact(
+                    label: "REFILL SPEED",
+                    value: "+\(refillUSD) every \(duration(WeeklyTokenLimit.regenerationInterval))"
+                )
+            }
+
+            if limit.remaining < limit.maximum, limit.refillAmount > 0 {
+                DashedDivider(color: Color.synPlannerInk.opacity(0.34))
+
+                HStack {
+                    Text("I want available")
+                        .font(.subheadline.bold())
+                    Spacer()
+                    Text(target, format: .currency(code: "USD"))
+                        .font(.system(.headline, design: .rounded, weight: .black))
+                }
+
+                Slider(value: $target, in: limit.remaining...limit.maximum, step: limit.refillAmount)
+                    .tint(.synPurple)
+                    .accessibilityLabel("Target weekly reserve")
+                    .accessibilityValue(Text(target, format: .currency(code: "USD")))
+
+                HStack(spacing: 12) {
+                    Stamp(icon: "clock", color: Color.synPurple.opacity(0.25))
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text("IF YOU PAUSE NEW USAGE")
+                            .font(.caption2.bold())
+                            .foregroundStyle(Color.synPlannerInk.opacity(0.85))
+                        Text("You'll reach that in about \(duration(limit.timeToReach(target, now: now))).")
+                            .font(.subheadline.bold())
+                    }
+                }
+            } else if limit.refillAmount > 0 {
+                Label("Your weekly credits are fully regenerated.", systemImage: "sparkles")
+                    .font(.subheadline.bold())
+            } else if limit.remaining < limit.maximum {
+                Label("Weekly refills are paused for this account.", systemImage: "pause.circle")
+                    .font(.subheadline.bold())
+            }
         }
-        .onChange(of: limit.remaining) { _, newValue in
-            target = min(limit.maximum, max(newValue, target))
+        .foregroundStyle(Color.synPlannerInk)
+        .padding(19)
+        .background(Color.synYellow)
+        .stickerBorder(shadow: .synInkShadow, cornerRadius: 20, offset: 6)
+        .rotationEffect(.degrees(0.6))
+        .onChange(of: limit) { _, newLimit in
+            target = min(max(target, newLimit.remaining), newLimit.maximum)
         }
     }
 }
@@ -560,9 +673,9 @@ private struct UsageHistoryView: View {
     let history: [DailySnapshot]
     @State private var days = 7
 
-    private var visibleHistory: [DailySnapshot] { Array(history.suffix(days)) }
-
     var body: some View {
+        let visibleHistory = Array(history.suffix(days))
+
         VStack(alignment: .leading, spacing: 22) {
             Text("YOUR WEEK SO FAR ✿")
                 .font(.system(.headline, design: .rounded, weight: .black))
@@ -570,8 +683,10 @@ private struct UsageHistoryView: View {
                 .padding(.horizontal, 17)
                 .padding(.vertical, 11)
                 .background(Color.synPink)
-                .stickerBorder(cornerRadius: 10, offset: 5)
-                .rotationEffect(.degrees(-1.2))
+                .stickerBorder(shadow: .synInkShadow, cornerRadius: 10, offset: 5)
+                .rotationEffect(.degrees(-1.7))
+                .accessibilityLabel("Your week so far")
+                .accessibilityAddTraits(.isHeader)
 
             HStack(alignment: .bottom) {
                 VStack(alignment: .leading, spacing: 4) {
@@ -582,7 +697,7 @@ private struct UsageHistoryView: View {
                     Text("History")
                         .font(.system(.largeTitle, design: .rounded, weight: .black))
                         .accessibilityAddTraits(.isHeader)
-                    Text("Saved quota snapshots, newest first.")
+                    Text("Saved quota snapshots, oldest to newest.")
                         .font(.subheadline)
                         .foregroundStyle(Color.synMuted)
                 }
@@ -593,8 +708,10 @@ private struct UsageHistoryView: View {
             if visibleHistory.isEmpty {
                 EmptyHistoryView()
             } else {
-                historyChart
-                activitySummary
+                historyChart(visibleHistory)
+                if visibleHistory.count >= 2 {
+                    activitySummary(visibleHistory)
+                }
             }
 
             Text("History starts with your first check-in and stays on this device.")
@@ -615,7 +732,7 @@ private struct UsageHistoryView: View {
         .notebookOutline(cornerRadius: 11)
     }
 
-    private var historyChart: some View {
+    private func historyChart(_ visibleHistory: [DailySnapshot]) -> some View {
         VStack(alignment: .leading, spacing: 14) {
             Text("WEEKLY CREDITS AVAILABLE")
                 .font(.caption.bold())
@@ -628,7 +745,7 @@ private struct UsageHistoryView: View {
                     y: .value("Credits", item.weeklyRemaining),
                     width: .ratio(0.64)
                 )
-                .foregroundStyle(barColor(for: item.date))
+                .foregroundStyle(Self.chartColor(for: item.date))
                 .cornerRadius(7)
                 .annotation(position: .top) {
                     Text(item.weeklyRemaining, format: .currency(code: "USD").precision(.fractionLength(0)))
@@ -645,7 +762,7 @@ private struct UsageHistoryView: View {
             }
             .chartXAxis {
                 AxisMarks(values: .stride(by: .day)) { _ in
-                    AxisValueLabel(format: .dateTime.weekday(.narrow))
+                    AxisValueLabel(format: .dateTime.weekday(.short))
                 }
             }
             .frame(height: 206)
@@ -653,9 +770,10 @@ private struct UsageHistoryView: View {
         .padding(19)
         .background(Color.synPaper)
         .stickerBorder(cornerRadius: 22, offset: 7)
+        .rotationEffect(.degrees(-0.5))
     }
 
-    private var activitySummary: some View {
+    private func activitySummary(_ visibleHistory: [DailySnapshot]) -> some View {
         HStack(spacing: 12) {
             SummaryCard(
                 label: "MOST IN RESERVE",
@@ -666,7 +784,7 @@ private struct UsageHistoryView: View {
             SummaryCard(
                 label: "LEAST IN RESERVE",
                 value: dayName(visibleHistory.min { $0.weeklyRemaining < $1.weeklyRemaining }?.date),
-                color: .synBlue,
+                color: .synPink,
                 rotation: 1.4
             )
         }
@@ -683,9 +801,18 @@ private struct UsageHistoryView: View {
             .accessibilityAddTraits(days == value ? .isSelected : [])
     }
 
-    private func barColor(for date: Date) -> Color {
-        let colors: [Color] = [.synPink, .synYellow, .synMint, .synBlue, .synPink, .synYellow, .synMint]
-        return colors[(Calendar.current.component(.weekday, from: date) - 1) % colors.count]
+    private static let chartDayColors: [Color] = [
+        Color.adaptive(light: .rgb(0.80, 0.32, 0.52), dark: .rgb(0.55, 0.26, 0.42)),
+        Color.adaptive(light: .rgb(0.62, 0.48, 0.10), dark: .rgb(0.94, 0.89, 0.64)),
+        Color.adaptive(light: .rgb(0.12, 0.50, 0.38), dark: .rgb(0.16, 0.37, 0.29)),
+        Color.adaptive(light: .rgb(0.10, 0.38, 0.58), dark: .rgb(0.16, 0.31, 0.44)),
+        Color.adaptive(light: .rgb(0.80, 0.32, 0.52), dark: .rgb(0.55, 0.26, 0.42)),
+        Color.adaptive(light: .rgb(0.62, 0.48, 0.10), dark: .rgb(0.94, 0.89, 0.64)),
+        Color.adaptive(light: .rgb(0.12, 0.50, 0.38), dark: .rgb(0.16, 0.37, 0.29)),
+    ]
+
+    private static func chartColor(for date: Date) -> Color {
+        chartDayColors[(Calendar.current.component(.weekday, from: date) - 1) % chartDayColors.count]
     }
 
     private func dayName(_ date: Date?) -> String {
@@ -746,15 +873,16 @@ private struct RefillFact: View {
         VStack(alignment: .leading, spacing: 4) {
             Text(label)
                 .font(.caption2.bold())
-                .foregroundStyle(Color.synPlannerInk.opacity(0.68))
+                .foregroundStyle(Color.synPlannerInk.opacity(0.85))
             Text(value)
                 .font(.system(.caption, design: .rounded, weight: .bold))
                 .fixedSize(horizontal: false, vertical: true)
         }
         .frame(maxWidth: .infinity, minHeight: 50, alignment: .leading)
         .padding(11)
-        .background(Color.white.opacity(0.55))
-        .notebookOutline(cornerRadius: 11)
+        .background(Color.synPaper.opacity(0.66))
+        .overlay(RoundedRectangle(cornerRadius: 11).strokeBorder(Color.synPlannerInk.opacity(0.85), lineWidth: 1.5))
+        .clipShape(RoundedRectangle(cornerRadius: 11))
     }
 }
 
@@ -769,7 +897,7 @@ private struct SummaryCard: View {
             Text(label)
                 .font(.caption2.bold())
                 .tracking(0.4)
-                .foregroundStyle(Color.synInk.opacity(0.72))
+                .foregroundStyle(Color.synInk.opacity(0.8))
             Text(value)
                 .font(.system(.headline, design: .rounded, weight: .black))
                 .foregroundStyle(Color.synInk)
@@ -805,11 +933,13 @@ private struct DashedDivider: View {
 private struct EmptyUsageView: View {
     let message: String
     let retry: () -> Void
+    var isError: Bool = false
 
     var body: some View {
         VStack(spacing: 16) {
-            Image(systemName: "cloud.sun")
+            Image(systemName: isError ? "exclamationmark.triangle.fill" : "cloud.sun")
                 .font(.largeTitle)
+                .accessibilityHidden(true)
             Text(message)
                 .multilineTextAlignment(.center)
             Button("Try Again", action: retry)
@@ -817,7 +947,7 @@ private struct EmptyUsageView: View {
         }
         .padding(28)
         .frame(maxWidth: .infinity)
-        .background(Color.synYellow)
+        .background(isError ? Color.synError.opacity(0.15) : Color.synYellow)
         .stickerBorder(cornerRadius: 18)
     }
 }
@@ -827,9 +957,10 @@ private struct EmptyHistoryView: View {
         VStack(spacing: 10) {
             Image(systemName: "chart.bar")
                 .font(.largeTitle)
-            Text("Your first data point is ready")
+                .accessibilityHidden(true)
+            Text("No history yet")
                 .font(.system(.headline, design: .rounded, weight: .bold))
-            Text("Check back tomorrow to start seeing a trend.")
+            Text("Your first successful check-in will start the chart.")
                 .font(.subheadline)
                 .foregroundStyle(Color.synMuted)
         }
@@ -845,7 +976,7 @@ private func ratio(_ value: Double, _ maximum: Double) -> Double {
 }
 
 private func format(_ value: Double) -> String {
-    value.formatted(.number.precision(.fractionLength(value.rounded() == value ? 0 : 1)))
+    Int(value.rounded()).formatted()
 }
 
 private func percent(_ ratio: Double) -> String {
@@ -855,6 +986,12 @@ private func percent(_ ratio: Double) -> String {
 private func countdown(to date: Date?, now: Date) -> String {
     guard let date else { return "soon" }
     return duration(max(0, date.timeIntervalSince(now)))
+}
+
+private func refillDueText(amount: String, date: Date?, now: Date) -> String {
+    guard let date else { return "+\(amount) soon" }
+    if date <= now { return "+\(amount) refilling now" }
+    return "+\(amount) in \(countdown(to: date, now: now))"
 }
 
 private func duration(_ interval: TimeInterval) -> String {

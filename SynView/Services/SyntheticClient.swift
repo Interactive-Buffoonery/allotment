@@ -10,6 +10,7 @@ struct SyntheticClient: Sendable {
 
     func fetchQuota(apiKey: String) async throws -> QuotaResponse {
         var request = URLRequest(url: endpoint)
+        request.timeoutInterval = 20
         request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
 

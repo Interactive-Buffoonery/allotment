@@ -8,13 +8,11 @@
 
 /* Begin PBXBuildFile section */
 		0A5AA47F34156D3A940C8481 /* APIKeyStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EF98AE5B9C9FEF866582BEC /* APIKeyStore.swift */; };
-		18BB6E7EECAC5B47104B056B /* OFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = 1939391E66BFD2D453D27E05 /* OFL.txt */; };
 		22E954EAD255AA14EAA2EBD2 /* QuotaAccessState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1017C45827EC218BB0FC48DF /* QuotaAccessState.swift */; };
 		3697E3C31F15A42D2E3AF654 /* QuotaSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20154FE33FF34E5B80836179 /* QuotaSnapshot.swift */; };
 		4D6ACEBFFE5F4D3CA95BBA6A /* SynViewApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5435F0FFB4958EE18E609BB9 /* SynViewApp.swift */; };
 		51772FED46016927F9896F41 /* AppAppearance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55AB9F77DA35D6FB6831DA1B /* AppAppearance.swift */; };
 		6013991B2B103C432E584BE7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13F4EFD20F941B2B9387898D /* Assets.xcassets */; };
-		633BAB0DF9D7BFE40ADA1B3A /* LilitaOne-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 5D35423C693D9C4C8DBA63D8 /* LilitaOne-Regular.ttf */; };
 		77BBACDB6661B7BA4A5DEDC6 /* Style.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41A907B99741A3E1788D7F03 /* Style.swift */; };
 		8C837C7174871A195A7AED4C /* UsageLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0F63775419D4D6BBF01C1B /* UsageLayout.swift */; };
 		A3D9EA06B2EAAF82D0D7400B /* QuotaSnapshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 539BEDFCF6EE59CA77EFA1C9 /* QuotaSnapshotTests.swift */; };
@@ -22,6 +20,7 @@
 		D0975CC115D3BAE7CA9ED5F8 /* SyntheticClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 136377BB27CE1C317A131288 /* SyntheticClient.swift */; };
 		D747B3AA2F59877F8E04267C /* UsageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFB4029C87CE88B74AD0A5E3 /* UsageStore.swift */; };
 		D8B4F8CBD56D9D5D850C1364 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1C6FD6436ECF7EE3027CB28 /* DashboardView.swift */; };
+		F7AD8DFCC73869A37C4DDAAB /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 80C97578A28CEEE11608BB00 /* PrivacyInfo.xcprivacy */; };
 		FA13C769A0B85B5B655323C9 /* SetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4390F70B860472444A49917 /* SetupView.swift */; };
 		FE2F6238BD9B7C309FB735B3 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF25DE63E9DF3A3D87FADBB /* RootView.swift */; };
 /* End PBXBuildFile section */
@@ -40,7 +39,6 @@
 		1017C45827EC218BB0FC48DF /* QuotaAccessState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotaAccessState.swift; sourceTree = "<group>"; };
 		136377BB27CE1C317A131288 /* SyntheticClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyntheticClient.swift; sourceTree = "<group>"; };
 		13F4EFD20F941B2B9387898D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		1939391E66BFD2D453D27E05 /* OFL.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = OFL.txt; sourceTree = "<group>"; };
 		1C83EB9B3B6214BFF9B082A4 /* SynView.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = SynView.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1EF98AE5B9C9FEF866582BEC /* APIKeyStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIKeyStore.swift; sourceTree = "<group>"; };
 		20154FE33FF34E5B80836179 /* QuotaSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotaSnapshot.swift; sourceTree = "<group>"; };
@@ -48,8 +46,8 @@
 		539BEDFCF6EE59CA77EFA1C9 /* QuotaSnapshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotaSnapshotTests.swift; sourceTree = "<group>"; };
 		5435F0FFB4958EE18E609BB9 /* SynViewApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SynViewApp.swift; sourceTree = "<group>"; };
 		55AB9F77DA35D6FB6831DA1B /* AppAppearance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppAppearance.swift; sourceTree = "<group>"; };
-		5D35423C693D9C4C8DBA63D8 /* LilitaOne-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "LilitaOne-Regular.ttf"; sourceTree = "<group>"; };
 		7D350C7940491E7B8732EF44 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		80C97578A28CEEE11608BB00 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		B80965AEF67833C9EB9DC6DD /* SynViewTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = SynViewTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		BD217A0293E0AB2FF76466BA /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		C4390F70B860472444A49917 /* SetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupView.swift; sourceTree = "<group>"; };
@@ -118,35 +116,18 @@
 			path = App;
 			sourceTree = "<group>";
 		};
-		6A41FA2129EE31AE1D0CEB35 /* Fonts */ = {
-			isa = PBXGroup;
-			children = (
-				5D35423C693D9C4C8DBA63D8 /* LilitaOne-Regular.ttf */,
-				1939391E66BFD2D453D27E05 /* OFL.txt */,
-			);
-			path = Fonts;
-			sourceTree = "<group>";
-		};
 		721AE2D86CEBA3D2971956A1 /* SynView */ = {
 			isa = PBXGroup;
 			children = (
 				13F4EFD20F941B2B9387898D /* Assets.xcassets */,
 				7D350C7940491E7B8732EF44 /* Info.plist */,
+				80C97578A28CEEE11608BB00 /* PrivacyInfo.xcprivacy */,
 				6891309F57B664C2EF15477F /* App */,
 				65864B0883921ACE45A98B36 /* Models */,
-				A392C76F98BEC87F24EF9D74 /* Resources */,
 				C73E7CA69674950ADA81AD7D /* Services */,
 				58F99E31ACE31541CC341BF9 /* Views */,
 			);
 			path = SynView;
-			sourceTree = "<group>";
-		};
-		A392C76F98BEC87F24EF9D74 /* Resources */ = {
-			isa = PBXGroup;
-			children = (
-				6A41FA2129EE31AE1D0CEB35 /* Fonts */,
-			);
-			path = Resources;
 			sourceTree = "<group>";
 		};
 		C73E7CA69674950ADA81AD7D /* Services */ = {
@@ -242,8 +223,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				6013991B2B103C432E584BE7 /* Assets.xcassets in Resources */,
-				633BAB0DF9D7BFE40ADA1B3A /* LilitaOne-Regular.ttf in Resources */,
-				18BB6E7EECAC5B47104B056B /* OFL.txt in Resources */,
+				F7AD8DFCC73869A37C4DDAAB /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -340,7 +320,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 3;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 7CNK4YPCQX;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -361,7 +341,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 0.1.2;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -460,7 +440,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 3;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 7CNK4YPCQX;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -475,7 +455,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 0.1.2;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";

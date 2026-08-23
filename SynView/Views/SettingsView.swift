@@ -8,6 +8,7 @@ struct SettingsView: View {
     @State private var apiKey = ""
     @State private var keyMessage: String?
     @State private var keyMessageIsError = false
+    @State private var showDisconnectConfirmation = false
     @FocusState private var isKeyFocused: Bool
     @AccessibilityFocusState private var isKeyMessageFocused: Bool
 
@@ -42,6 +43,8 @@ struct SettingsView: View {
                 .background(Color.synPink)
                 .stickerBorder(cornerRadius: 10, offset: 5)
                 .rotationEffect(.degrees(-1.4))
+                .accessibilityLabel("Pick your view")
+                .accessibilityAddTraits(.isHeader)
 
             layoutButton(.bars, color: .synYellow, rotation: -1.2)
 
@@ -219,22 +222,31 @@ struct SettingsView: View {
 
             if store.hasAPIKey {
                 Button("Disconnect Synthetic", role: .destructive) {
-                    store.disconnect()
-                    keyMessage = "Synthetic disconnected."
-                    keyMessageIsError = false
-                    isKeyMessageFocused = true
+                    showDisconnectConfirmation = true
                 }
                 .font(.subheadline.bold())
-                .frame(maxWidth: .infinity)
+                .frame(maxWidth: .infinity, minHeight: 44)
             }
 
-            Text("Your key stays in this device’s Keychain.")
+            Text("Your key stays in this device's Keychain.")
                 .font(.footnote)
                 .foregroundStyle(Color.synMuted)
         }
         .padding(19)
         .background(Color.synPaper)
         .stickerBorder(cornerRadius: 22)
+        .confirmationDialog(
+            "Disconnect Synthetic?",
+            isPresented: $showDisconnectConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Disconnect", role: .destructive) {
+                store.disconnect()
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Your saved history will remain on this device.")
+        }
     }
 
     private func isSelected(_ option: AppAppearance) -> Bool {

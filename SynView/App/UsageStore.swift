@@ -15,6 +15,7 @@ final class UsageStore {
     private let keyStore: APIKeyStore
     private let defaults: UserDefaults
     private let historyKey = "usage-history"
+    private static let historyEncoder = JSONEncoder()
 
     var hasAPIKey: Bool { apiKey?.isEmpty == false }
 
@@ -91,7 +92,7 @@ final class UsageStore {
         history.removeAll { Calendar.current.isDate($0.date, inSameDayAs: today) }
         history.append(entry)
         history = Array(history.sorted { $0.date < $1.date }.suffix(30))
-        if let data = try? JSONEncoder().encode(history) {
+        if let data = try? Self.historyEncoder.encode(history) {
             defaults.set(data, forKey: historyKey)
         }
     }
@@ -110,7 +111,7 @@ final class UsageStore {
 
     private static let sampleHistory: [DailySnapshot] = zip(0..<7, [31.20, 28.80, 34.56, 19.20, 22.08, 24.96, 18.66]).map { offset, credits in
         DailySnapshot(
-            date: Calendar.current.date(byAdding: .day, value: offset - 6, to: Calendar.current.startOfDay(for: .now))!,
+            date: Calendar.current.date(byAdding: .day, value: offset - 6, to: Calendar.current.startOfDay(for: .now)) ?? .now,
             weeklyRemaining: credits,
             weeklyMaximum: 48,
             rollingRemaining: 850,
