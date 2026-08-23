@@ -241,11 +241,13 @@ private struct QuotaBarsCard: View {
         let weeklyRefillUSD = weekly.refillAmount.formatted(.currency(code: "USD"))
 
         VStack(spacing: 0) {
-            GateStatusBadge(state: state)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(20)
+            if !state.isReady {
+                GateStatusBadge(state: state)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(20)
 
-            DashedDivider()
+                DashedDivider()
+            }
 
             GateBarSection(
                 icon: "diamond",
@@ -384,11 +386,13 @@ private struct QuotaRingsCard: View {
         let weeklyRefillUSD = weekly.refillAmount.formatted(.currency(code: "USD"))
 
         VStack(spacing: 0) {
-            GateStatusBadge(state: state)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(20)
+            if !state.isReady {
+                GateStatusBadge(state: state)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(20)
 
-            DashedDivider()
+                DashedDivider()
+            }
 
             HStack(alignment: .top, spacing: 8) {
                 QuotaRing(
