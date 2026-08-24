@@ -16,12 +16,14 @@
 | Wordmark in `SetupView` badge | "SYNVIEW ✿" | "ALLOTMENT ✿" |
 | `SettingsView` appearance copy | "Pick SynView's look…" | "Pick Allotment's look…" |
 
-### What does NOT change (deliberate)
+### Full rename (user decision: everything renames)
 
-- **Bundle ID** stays `com.interactivebuffoonery.synview`. Changing it means a new App Store Connect record and every TestFlight tester reinstalling. Existing installs update in place otherwise.
-- **Xcode module/target names** (`SynView`, `SynViewTests`) stay for now. Internal-only; a single rename pass later if desired, zero user benefit today.
-- **Internal color names** (`synInk`, `synPurple`, etc.) stay. Cosmetic-only rename, not worth the diff now.
-- App Store Connect app name updated at next submission, not in code.
+- **Bundle ID:** `com.interactivebuffoonery.synview` → `com.interactivebuffoonery.allotment` (test bundle likewise). Consequences accepted by user: new App Store Connect app record, existing TestFlight testers reinstall fresh, old record's build history is not carried over.
+- **Xcode target/scheme/module names:** `SynView` → `Allotment`, `SynViewTests` → `AllotmentTests`. Source directories renamed (`SynView/` → `Allotment/`, `SynViewTests/` → `AllotmentTests/`), project.yml regenerated via XcodeGen.
+- **Internal identifier prefixes:** `syn*` color names (`synInk`, `synPurple`…) → `allo*` equivalents, and `synWordmark` → `alloWordmark`. Provider-specific names that reference Synthetic-as-a-service (`SyntheticClient`, "Synthetic API Key" labels) stay — those name the provider, not the app.
+- **AppStorage/UserDefaults keys** referencing the old name move to `allotment.*` keys (usage-layout key is being deleted anyway; appearance key migrates or resets — resetting is fine, it's one preference).
+- Repo directory name (`synview`) can stay as-is locally; GitHub remote rename is optional and separate.
+- App Store Connect: create new app record under "Allotment" before next submission.
 
 ## 2. Theme
 
@@ -70,7 +72,10 @@ Replaces single-screen `SetupView` with a two-step flow. The pattern: **one pick
 - API-key card becomes a **Providers** section: one row per connected provider ("Synthetic — key on this device") with chevron → key-entry screen, plus a dashed **Add provider** row that opens the step-1/2 flow. For now, "Add provider" over an already-connected Synthetic just opens key update.
 - Section header above the cards: keeps the existing "MAKE IT YOURS" kicker and "Settings" title.
 - **Layout picker deleted entirely** — see §8.
-- **iCloud section (placeholder):** a dimmed card labeled "iCloud Sync" with a "COMING SOON" chip and one line of copy — "Sync providers and history across your devices." No toggle. Non-functional; no CloudKit entitlements yet. Establishes the slot so the real feature drops in without redesigning Settings. Sync scope when built: provider connections (keys stay in per-device Keychain, do not sync) and quota history.
+- **iCloud section (placeholder):** a dimmed card labeled "iCloud Sync" with a "COMING SOON" chip and copy — "Sync providers, keys, and history across your devices." Non-functional; no entitlements yet.
+- **Sync design (decided now, built later):** two channels.
+  - **Keys:** synced via **iCloud Keychain** (`kSecAttrSynchronizable = true` on key items). This is genuinely secure — iCloud Keychain is end-to-end encrypted (it's how Safari passwords sync); keys never touch App-CloudKit storage. Offered as an **opt-in toggle** ("Sync via iCloud Keychain") so users who want per-device keys keep that behavior. Default: off.
+  - **History & settings:** synced via **CloudKit** (private database) or `NSUbiquitousKeyValueStore` for the small settings surface. Provider connections sync, so a "connected" state appears on all devices — but without key sync opted in, a second device shows the provider and prompts for its key.
 - Appearance card stays (System/Light/Dark) with copy updated to "Allotment".
 - Disconnect becomes "Disconnect Synthetic" per-provider row (destructive), unchanged behavior.
 
@@ -90,7 +95,7 @@ Explicitly NOT used anywhere: plot, bed, shed, till, sow, grow, harvest, water. 
 ## 10. Out of scope
 
 - Codex (or any second provider) integration — only the model seam and the COMING SOON row.
-- Bundle ID / target / module renames.
+- iCloud sync implementation — only the settings placeholder and the sync design decision.
 - History chart changes, planner-card changes, iPad layout changes.
 - haptic/sound/animated-transitions work.
 
