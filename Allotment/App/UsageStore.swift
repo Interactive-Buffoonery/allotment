@@ -21,7 +21,7 @@ final class UsageStore {
 
     init(
         client: SyntheticClient = SyntheticClient(),
-        keyStore: APIKeyStore = APIKeyStore(),
+        keyStore: APIKeyStore = APIKeyStore(provider: .synthetic),
         defaults: UserDefaults = .standard
     ) {
         self.client = client

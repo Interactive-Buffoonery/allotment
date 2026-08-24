@@ -192,11 +192,11 @@ private struct CurrentUsageView: View {
                let weekly = snapshot.weeklyTokenLimit {
                 if sizeClass == .regular {
                     HStack(alignment: .top, spacing: 24) {
-                        QuotaBarsCard(weekly: weekly, rolling: rolling, lastUpdated: lastUpdated, now: now)
+                        QuotaBarsCard(provider: .synthetic, weekly: weekly, rolling: rolling, lastUpdated: lastUpdated, now: now)
                         WeeklyPlannerCard(limit: weekly, now: now)
                     }
                 } else {
-                    QuotaBarsCard(weekly: weekly, rolling: rolling, lastUpdated: lastUpdated, now: now)
+                    QuotaBarsCard(provider: .synthetic, weekly: weekly, rolling: rolling, lastUpdated: lastUpdated, now: now)
                     WeeklyPlannerCard(limit: weekly, now: now)
                 }
             } else if let subscription = snapshot.subscription {
@@ -213,6 +213,7 @@ private struct CurrentUsageView: View {
 }
 
 private struct QuotaBarsCard: View {
+    let provider: Provider
     let weekly: WeeklyTokenLimit
     let rolling: RollingFiveHourLimit
     let lastUpdated: Date?
@@ -271,6 +272,7 @@ private struct QuotaBarsCard: View {
         .background(Color.alloPaper)
         .stickerBorder(cornerRadius: 24, offset: 7)
         .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("quota-card.\(provider.rawValue)")
     }
 }
 

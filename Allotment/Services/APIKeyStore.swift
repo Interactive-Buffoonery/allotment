@@ -3,7 +3,11 @@ import Security
 
 struct APIKeyStore: Sendable {
     private let service = "com.interactivebuffoonery.allotment"
-    private let account = "synthetic-api-key"
+    private let account: String
+
+    init(provider: Provider) {
+        account = "apikey.\(provider.rawValue)"
+    }
 
     func load() -> String? {
         let query: [String: Any] = [

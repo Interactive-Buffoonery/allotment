@@ -20,9 +20,11 @@
 		D4D966883495EE4897AFCF4F /* UsageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBA16B5B6BCDDEE23B525B72 /* UsageStore.swift */; };
 		DE6C9F6460675CB968953984 /* QuotaSnapshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66F4BCA5504740843AF0C85D /* QuotaSnapshotTests.swift */; };
 		E1D2F537879BAA3B9D5E57DC /* AppAppearance.swift in Sources */ = {isa = PBXBuildFile; fileRef = B91A49F2882A186784001DBD /* AppAppearance.swift */; };
+		EB6E84890220204C2DB73F68 /* Provider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EB00098DA309A6F4B134A90 /* Provider.swift */; };
 		EC0E94347D3C64EFD999047D /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2546AD143F1A82CB0B173E54 /* SettingsView.swift */; };
 		ECEA660ECA8B8E850FCA43DF /* QuotaAccessState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4848D05BC7FF8048CE22C51D /* QuotaAccessState.swift */; };
 		FE63207259B658AEB1F4E1D5 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E1CEE7B69CD72208B459FB1 /* DashboardView.swift */; };
+		FFD7606A61640801B4888DA0 /* APIKeyStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B44067A095E91239EB69D16B /* APIKeyStoreTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -40,6 +42,7 @@
 		0F9948C821B3CB301E39890A /* SetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupView.swift; sourceTree = "<group>"; };
 		1785C04AAB7D904B8DCAD8AC /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		1D02F849B1ED88A42108EFA1 /* Style.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Style.swift; sourceTree = "<group>"; };
+		1EB00098DA309A6F4B134A90 /* Provider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Provider.swift; sourceTree = "<group>"; };
 		2546AD143F1A82CB0B173E54 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		4848D05BC7FF8048CE22C51D /* QuotaAccessState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotaAccessState.swift; sourceTree = "<group>"; };
 		4E1CEE7B69CD72208B459FB1 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
@@ -48,6 +51,7 @@
 		7B5125A67767D50ABDB6CFE7 /* SyntheticClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyntheticClient.swift; sourceTree = "<group>"; };
 		8ACD669FCDA2752A76A48884 /* AllotmentTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = AllotmentTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		AB54777B5D2F39C7216BF232 /* QuotaSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotaSnapshot.swift; sourceTree = "<group>"; };
+		B44067A095E91239EB69D16B /* APIKeyStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIKeyStoreTests.swift; sourceTree = "<group>"; };
 		B91A49F2882A186784001DBD /* AppAppearance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppAppearance.swift; sourceTree = "<group>"; };
 		CBA16B5B6BCDDEE23B525B72 /* UsageStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageStore.swift; sourceTree = "<group>"; };
 		CF05F7863F9C62630E5FBCFF /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
@@ -61,6 +65,7 @@
 		19CB8BF08F85D785EE872326 /* AllotmentTests */ = {
 			isa = PBXGroup;
 			children = (
+				B44067A095E91239EB69D16B /* APIKeyStoreTests.swift */,
 				66F4BCA5504740843AF0C85D /* QuotaSnapshotTests.swift */,
 			);
 			path = AllotmentTests;
@@ -108,6 +113,7 @@
 		5B5575374D98AD1AEC641AB9 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				1EB00098DA309A6F4B134A90 /* Provider.swift */,
 				4848D05BC7FF8048CE22C51D /* QuotaAccessState.swift */,
 				AB54777B5D2F39C7216BF232 /* QuotaSnapshot.swift */,
 			);
@@ -243,6 +249,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FFD7606A61640801B4888DA0 /* APIKeyStoreTests.swift in Sources */,
 				DE6C9F6460675CB968953984 /* QuotaSnapshotTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -255,6 +262,7 @@
 				AD8CD4CE895EC8BC7DB2AF7F /* AllotmentApp.swift in Sources */,
 				E1D2F537879BAA3B9D5E57DC /* AppAppearance.swift in Sources */,
 				FE63207259B658AEB1F4E1D5 /* DashboardView.swift in Sources */,
+				EB6E84890220204C2DB73F68 /* Provider.swift in Sources */,
 				ECEA660ECA8B8E850FCA43DF /* QuotaAccessState.swift in Sources */,
 				7031B46ACC9BE0912CE71517 /* QuotaSnapshot.swift in Sources */,
 				90AAD478446CFA7DA803E1FF /* RootView.swift in Sources */,
