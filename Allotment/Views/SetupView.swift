@@ -63,7 +63,7 @@ struct SetupView: View {
                             .padding(.vertical, 15)
                     }
                     .buttonStyle(.plain)
-                    .background(Color.alloYellow)
+                    .background(Color.alloMauve)
                     .stickerBorder()
                     .disabled(apiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
 

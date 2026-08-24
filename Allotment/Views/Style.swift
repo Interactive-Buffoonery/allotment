@@ -5,7 +5,7 @@ extension Color {
     static let alloMuted = adaptive(light: .rgb(0.44, 0.42, 0.53), dark: .rgb(0.75, 0.72, 0.82))
     static let alloPaper = adaptive(light: .rgb(1.0, 0.99, 0.97), dark: .rgb(0.13, 0.12, 0.18))
     static let alloPink = adaptive(light: .rgb(1.0, 0.68, 0.82), dark: .rgb(0.55, 0.26, 0.42))
-    static let alloYellow = adaptive(light: .rgb(1.0, 0.94, 0.62), dark: .rgb(0.94, 0.89, 0.64))
+    static let alloMauve = Color(uiColor: .rgb(0.776, 0.627, 0.965))
     static let alloMint = adaptive(light: .rgb(0.65, 0.90, 0.78), dark: .rgb(0.16, 0.37, 0.29))
     static let alloBlue = adaptive(light: .rgb(0.73, 0.93, 1.0), dark: .rgb(0.16, 0.31, 0.44))
     static let alloPurple = adaptive(light: .rgb(0.55, 0.47, 0.85), dark: .rgb(0.67, 0.59, 0.94))
@@ -14,8 +14,7 @@ extension Color {
     static let alloShadow = adaptive(light: .rgb(0.55, 0.47, 0.85), dark: .rgb(0.42, 0.34, 0.72))
     static let alloInkShadow = adaptive(light: .rgb(0.18, 0.16, 0.29), dark: .rgb(0.05, 0.04, 0.09))
     static let alloPlannerInk = Color(uiColor: .rgb(0.18, 0.16, 0.28))
-    static let alloWeeklyFill = adaptive(light: .rgb(0.96, 0.84, 0.44), dark: .rgb(0.91, 0.81, 0.47))
-    static let alloRequestFill = adaptive(light: .rgb(0.28, 0.69, 0.55), dark: .rgb(0.38, 0.76, 0.62))
+    static let alloRequestFill = adaptive(light: .rgb(0.14, 0.51, 0.37), dark: .rgb(0.38, 0.76, 0.62))
     static let alloError = adaptive(light: .rgb(0.72, 0.13, 0.16), dark: .rgb(0.96, 0.51, 0.55))
 
     static func adaptive(light: UIColor, dark: UIColor) -> Color {

@@ -48,7 +48,7 @@ struct SettingsView: View {
                 .accessibilityLabel("Pick your view")
                 .accessibilityAddTraits(.isHeader)
 
-            layoutButton(.bars, color: .alloYellow, rotation: -1.2)
+            layoutButton(.bars, color: .alloMauve, rotation: -1.2)
 
             Text("OR")
                 .font(.system(.caption, design: .rounded, weight: .black))
@@ -218,7 +218,7 @@ struct SettingsView: View {
             }
             .buttonStyle(.plain)
             .foregroundStyle(Color.alloPlannerInk)
-            .background(Color.alloYellow)
+            .background(Color.alloMauve)
             .stickerBorder()
             .disabled(apiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
 

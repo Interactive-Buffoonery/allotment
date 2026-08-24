@@ -42,7 +42,7 @@ struct DashboardView: View {
                 .tabItem { Label("Settings", systemImage: "gearshape.fill") }
                 .tag(AppTab.settings)
             }
-            .tint(.alloPurple)
+            .tint(.alloRequestFill)
             .toolbarBackground(Color.alloPaper, for: .tabBar)
             .toolbarBackground(.visible, for: .tabBar)
             .task {
@@ -87,7 +87,7 @@ private struct CurrentHeader: View {
                     .font(.system(size: 20, weight: .black))
                     .foregroundStyle(Color.alloPlannerInk)
                     .frame(width: 47, height: 47)
-                    .background(Color.alloYellow)
+                    .background(Color.alloPurple)
                     .clipShape(Circle())
                     .background {
                         Circle()
@@ -251,14 +251,14 @@ private struct QuotaBarsCard: View {
 
             GateBarSection(
                 icon: "diamond",
-                iconColor: .alloYellow,
+                iconColor: .alloMauve,
                 iconForeground: .alloPlannerInk,
                 title: "Weekly credits",
                 subtitle: "Long-term spending budget",
                 value: weeklyRemainingUSD,
                 maximum: "of \(weeklyMaximumUSD)",
                 progress: ratio(weekly.remaining, weekly.maximum),
-                fill: .alloWeeklyFill,
+                fill: .alloPurple,
                 refill: "+\(weeklyRefillUSD) every 3h 22m"
             )
 
@@ -400,7 +400,7 @@ private struct QuotaRingsCard: View {
                     subtitle: "of \(weeklyMaximumUSD)",
                     value: weeklyRemainingUSD,
                     progress: ratio(weekly.remaining, weekly.maximum),
-                    color: .alloWeeklyFill,
+                    color: .alloPurple,
                     refill: "+\(weeklyRefillUSD) / 3h 22m",
                     size: ringSize
                 )
@@ -485,7 +485,7 @@ private struct GateStatusBadge: View {
     var body: some View {
         HStack(spacing: 9) {
             Circle()
-                .fill(state.isReady ? Color.alloRequestFill : Color.alloWeeklyFill)
+                .fill(state.isReady ? Color.alloRequestFill : Color.alloPurple)
                 .frame(width: 12, height: 12)
                 .overlay(Circle().strokeBorder(Color.alloOutline.opacity(0.45), lineWidth: 1))
             Text(state.title.uppercased())
@@ -495,7 +495,7 @@ private struct GateStatusBadge: View {
         .foregroundStyle(colorScheme == .dark && state.isReady ? Color.alloInk : Color.alloPlannerInk)
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
-        .background(state.isReady ? Color.alloMint : Color.alloYellow)
+        .background(state.isReady ? Color.alloMint : Color.alloMauve)
         .stickerBorder(shadow: .alloInkShadow, cornerRadius: 22, offset: 3)
         .accessibilityElement(children: .combine)
     }
@@ -678,7 +678,7 @@ private struct WeeklyPlannerCard: View {
         }
         .foregroundStyle(Color.alloPlannerInk)
         .padding(19)
-        .background(Color.alloYellow)
+        .background(Color.alloMauve)
         .stickerBorder(shadow: .alloInkShadow, cornerRadius: 20, offset: 6)
         .rotationEffect(.degrees(0.6))
         .onChange(of: limit) { _, newLimit in
@@ -814,7 +814,7 @@ private struct UsageHistoryView: View {
             .foregroundStyle(Color.alloInk)
             .padding(.horizontal, 9)
             .frame(minHeight: 44)
-            .background(days == value ? Color.alloYellow : .clear)
+            .background(days == value ? Color.alloMauve : .clear)
             .clipShape(RoundedRectangle(cornerRadius: 7))
             .accessibilityAddTraits(days == value ? .isSelected : [])
     }
@@ -965,7 +965,7 @@ private struct EmptyUsageView: View {
         }
         .padding(28)
         .frame(maxWidth: .infinity)
-        .background(isError ? Color.alloError.opacity(0.15) : Color.alloYellow)
+        .background(isError ? Color.alloError.opacity(0.15) : Color.alloMauve)
         .stickerBorder(cornerRadius: 18)
     }
 }
