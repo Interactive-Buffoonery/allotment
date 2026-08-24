@@ -90,7 +90,7 @@ struct SettingsView: View {
                         .accessibilityHidden(true)
                 }
             }
-            .foregroundStyle(option == .bars ? Color.alloPlannerInk : Color.alloInk)
+            .foregroundStyle(option == .bars ? Color.alloStickerInk : Color.alloInk)
             .padding(.horizontal, 18)
             .padding(.vertical, 20)
             .background(color)
@@ -217,7 +217,7 @@ struct SettingsView: View {
                     .padding(.vertical, 15)
             }
             .buttonStyle(.plain)
-            .foregroundStyle(Color.alloPlannerInk)
+            .foregroundStyle(Color.alloStickerInk)
             .background(Color.alloMauve)
             .stickerBorder()
             .disabled(apiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)

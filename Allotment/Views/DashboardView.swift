@@ -85,7 +85,7 @@ private struct CurrentHeader: View {
             } label: {
                 Image(systemName: "arrow.clockwise")
                     .font(.system(size: 20, weight: .black))
-                    .foregroundStyle(Color.alloPlannerInk)
+                    .foregroundStyle(Color.alloStickerInk)
                     .frame(width: 47, height: 47)
                     .background(Color.alloPurple)
                     .clipShape(Circle())
@@ -252,7 +252,7 @@ private struct QuotaBarsCard: View {
             GateBarSection(
                 icon: "diamond",
                 iconColor: .alloMauve,
-                iconForeground: .alloPlannerInk,
+                iconForeground: .alloStickerInk,
                 title: "Weekly credits",
                 subtitle: "Long-term spending budget",
                 value: weeklyRemainingUSD,
@@ -480,7 +480,6 @@ private struct QuotaRing: View {
 
 private struct GateStatusBadge: View {
     let state: QuotaAccessState
-    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         HStack(spacing: 9) {
@@ -492,7 +491,7 @@ private struct GateStatusBadge: View {
                 .font(.system(.subheadline, design: .rounded, weight: .black))
                 .tracking(0.7)
         }
-        .foregroundStyle(colorScheme == .dark && state.isReady ? Color.alloInk : Color.alloPlannerInk)
+        .foregroundStyle(Color.alloStickerInk)
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
         .background(state.isReady ? Color.alloMint : Color.alloMauve)
@@ -612,12 +611,12 @@ private struct WeeklyPlannerCard: View {
                 VStack(alignment: .leading, spacing: 3) {
                     Text("AVAILABLE NOW")
                         .font(.caption2.bold())
-                        .foregroundStyle(Color.alloPlannerInk.opacity(0.85))
+                        .foregroundStyle(Color.alloStickerInk.opacity(0.85))
                     Text(remainingUSD)
                         .font(.system(.title2, design: .rounded, weight: .black))
                     Text("of \(maximumUSD)")
                         .font(.caption.bold())
-                        .foregroundStyle(Color.alloPlannerInk.opacity(0.85))
+                        .foregroundStyle(Color.alloStickerInk.opacity(0.85))
                 }
                 Spacer()
                 let pct = percent(limit.percentRemaining / 100)
@@ -643,7 +642,7 @@ private struct WeeklyPlannerCard: View {
             }
 
             if limit.remaining < limit.maximum, limit.refillAmount > 0 {
-                DashedDivider(color: Color.alloPlannerInk.opacity(0.34))
+                DashedDivider(color: Color.alloStickerInk.opacity(0.34))
 
                 HStack {
                     Text("I want available")
@@ -663,7 +662,7 @@ private struct WeeklyPlannerCard: View {
                     VStack(alignment: .leading, spacing: 3) {
                         Text("IF YOU PAUSE NEW USAGE")
                             .font(.caption2.bold())
-                            .foregroundStyle(Color.alloPlannerInk.opacity(0.85))
+                            .foregroundStyle(Color.alloStickerInk.opacity(0.85))
                         Text("You'll reach that in about \(duration(limit.timeToReach(target, now: now))).")
                             .font(.subheadline.bold())
                     }
@@ -676,7 +675,7 @@ private struct WeeklyPlannerCard: View {
                     .font(.subheadline.bold())
             }
         }
-        .foregroundStyle(Color.alloPlannerInk)
+        .foregroundStyle(Color.alloStickerInk)
         .padding(19)
         .background(Color.alloMauve)
         .stickerBorder(shadow: .alloInkShadow, cornerRadius: 20, offset: 6)
@@ -690,6 +689,7 @@ private struct WeeklyPlannerCard: View {
 private struct UsageHistoryView: View {
     let history: [DailySnapshot]
     @State private var days = 7
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         let visibleHistory = Array(history.suffix(days))
@@ -766,9 +766,18 @@ private struct UsageHistoryView: View {
                 .foregroundStyle(Self.chartColor(for: item.date))
                 .cornerRadius(7)
                 .annotation(position: .top) {
-                    Text(item.weeklyRemaining, format: .currency(code: "USD").precision(.fractionLength(0)))
+                    let label = Text(item.weeklyRemaining, format: .currency(code: "USD").precision(.fractionLength(0)))
                         .font(.caption2.bold())
-                        .foregroundStyle(Color.alloInk)
+                    if colorScheme == .dark {
+                        label
+                            .foregroundStyle(Color.alloStickerInk)
+                            .padding(.horizontal, 5)
+                            .padding(.vertical, 2)
+                            .background(Color.alloMauve, in: RoundedRectangle(cornerRadius: 5))
+                            .padding(.bottom, 3)
+                    } else {
+                        label.foregroundStyle(Color.alloInk)
+                    }
                 }
             }
             .chartYAxis {
@@ -820,13 +829,13 @@ private struct UsageHistoryView: View {
     }
 
     private static let chartDayColors: [Color] = [
-        Color.adaptive(light: .rgb(0.80, 0.32, 0.52), dark: .rgb(0.55, 0.26, 0.42)),
-        Color.adaptive(light: .rgb(0.62, 0.48, 0.10), dark: .rgb(0.94, 0.89, 0.64)),
-        Color.adaptive(light: .rgb(0.12, 0.50, 0.38), dark: .rgb(0.16, 0.37, 0.29)),
-        Color.adaptive(light: .rgb(0.10, 0.38, 0.58), dark: .rgb(0.16, 0.31, 0.44)),
-        Color.adaptive(light: .rgb(0.80, 0.32, 0.52), dark: .rgb(0.55, 0.26, 0.42)),
-        Color.adaptive(light: .rgb(0.62, 0.48, 0.10), dark: .rgb(0.94, 0.89, 0.64)),
-        Color.adaptive(light: .rgb(0.12, 0.50, 0.38), dark: .rgb(0.16, 0.37, 0.29)),
+        Color.adaptive(light: .rgb(0.80, 0.32, 0.52), dark: .rgb(1.0, 0.68, 0.82)),
+        Color.adaptive(light: .rgb(0.62, 0.48, 0.10), dark: .rgb(0.776, 0.627, 0.965)),
+        Color.adaptive(light: .rgb(0.12, 0.50, 0.38), dark: .rgb(0.65, 0.90, 0.78)),
+        Color.adaptive(light: .rgb(0.10, 0.38, 0.58), dark: .rgb(0.73, 0.93, 1.0)),
+        Color.adaptive(light: .rgb(0.80, 0.32, 0.52), dark: .rgb(1.0, 0.68, 0.82)),
+        Color.adaptive(light: .rgb(0.62, 0.48, 0.10), dark: .rgb(0.776, 0.627, 0.965)),
+        Color.adaptive(light: .rgb(0.12, 0.50, 0.38), dark: .rgb(0.65, 0.90, 0.78)),
     ]
 
     private static func chartColor(for date: Date) -> Color {
@@ -868,7 +877,7 @@ private struct LedgerRow: View {
 private struct Stamp: View {
     let icon: String
     let color: Color
-    var foreground = Color.alloInk
+    var foreground = Color.alloStickerInk
     var size: CGFloat = 39
 
     var body: some View {
@@ -891,7 +900,7 @@ private struct RefillFact: View {
         VStack(alignment: .leading, spacing: 4) {
             Text(label)
                 .font(.caption2.bold())
-                .foregroundStyle(Color.alloPlannerInk.opacity(0.85))
+                .foregroundStyle(Color.alloStickerInk.opacity(0.85))
             Text(value)
                 .font(.system(.caption, design: .rounded, weight: .bold))
                 .fixedSize(horizontal: false, vertical: true)
@@ -899,7 +908,7 @@ private struct RefillFact: View {
         .frame(maxWidth: .infinity, minHeight: 50, alignment: .leading)
         .padding(11)
         .background(Color.alloPaper.opacity(0.66))
-        .overlay(RoundedRectangle(cornerRadius: 11).strokeBorder(Color.alloPlannerInk.opacity(0.85), lineWidth: 1.5))
+        .overlay(RoundedRectangle(cornerRadius: 11).strokeBorder(Color.alloStickerInk.opacity(0.85), lineWidth: 1.5))
         .clipShape(RoundedRectangle(cornerRadius: 11))
     }
 }
@@ -915,10 +924,10 @@ private struct SummaryCard: View {
             Text(label)
                 .font(.caption2.bold())
                 .tracking(0.4)
-                .foregroundStyle(Color.alloInk.opacity(0.8))
+                .foregroundStyle(Color.alloStickerInk.opacity(0.8))
             Text(value)
                 .font(.system(.headline, design: .rounded, weight: .black))
-                .foregroundStyle(Color.alloInk)
+                .foregroundStyle(Color.alloStickerInk)
         }
         .frame(maxWidth: .infinity, minHeight: 73, alignment: .leading)
         .padding(15)
