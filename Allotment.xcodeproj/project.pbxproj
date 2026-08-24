@@ -8,9 +8,11 @@
 
 /* Begin PBXBuildFile section */
 		3737935084074F7D5FF2BCAF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E1FD8069E5785ABAE00B9036 /* Assets.xcassets */; };
+		512B8FD08A9352FCC3B99964 /* ProviderKeyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1EBF3817822F9054280DA3C /* ProviderKeyView.swift */; };
 		65DA7B94618B271377BD003E /* SetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F9948C821B3CB301E39890A /* SetupView.swift */; };
 		7031B46ACC9BE0912CE71517 /* QuotaSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB54777B5D2F39C7216BF232 /* QuotaSnapshot.swift */; };
 		71139E921B169336E7471902 /* Fraunces-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = F43F1A1AD15B347770B1EF24 /* Fraunces-SemiBold.ttf */; };
+		76AACE9B4B928BCB06830FC2 /* ProviderPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B29B2740A3BAAC4C65258C4C /* ProviderPickerView.swift */; };
 		773B21359E52C899A603EC97 /* SyntheticClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B5125A67767D50ABDB6CFE7 /* SyntheticClient.swift */; };
 		90AAD478446CFA7DA803E1FF /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1785C04AAB7D904B8DCAD8AC /* RootView.swift */; };
 		923AC05CCAB958FF388889EC /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = CF05F7863F9C62630E5FBCFF /* PrivacyInfo.xcprivacy */; };
@@ -51,6 +53,8 @@
 		7B5125A67767D50ABDB6CFE7 /* SyntheticClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyntheticClient.swift; sourceTree = "<group>"; };
 		8ACD669FCDA2752A76A48884 /* AllotmentTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = AllotmentTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		AB54777B5D2F39C7216BF232 /* QuotaSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotaSnapshot.swift; sourceTree = "<group>"; };
+		B1EBF3817822F9054280DA3C /* ProviderKeyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderKeyView.swift; sourceTree = "<group>"; };
+		B29B2740A3BAAC4C65258C4C /* ProviderPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderPickerView.swift; sourceTree = "<group>"; };
 		B44067A095E91239EB69D16B /* APIKeyStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIKeyStoreTests.swift; sourceTree = "<group>"; };
 		B91A49F2882A186784001DBD /* AppAppearance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppAppearance.swift; sourceTree = "<group>"; };
 		CBA16B5B6BCDDEE23B525B72 /* UsageStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageStore.swift; sourceTree = "<group>"; };
@@ -75,6 +79,8 @@
 			isa = PBXGroup;
 			children = (
 				4E1CEE7B69CD72208B459FB1 /* DashboardView.swift */,
+				B1EBF3817822F9054280DA3C /* ProviderKeyView.swift */,
+				B29B2740A3BAAC4C65258C4C /* ProviderPickerView.swift */,
 				1785C04AAB7D904B8DCAD8AC /* RootView.swift */,
 				2546AD143F1A82CB0B173E54 /* SettingsView.swift */,
 				0F9948C821B3CB301E39890A /* SetupView.swift */,
@@ -263,6 +269,8 @@
 				E1D2F537879BAA3B9D5E57DC /* AppAppearance.swift in Sources */,
 				FE63207259B658AEB1F4E1D5 /* DashboardView.swift in Sources */,
 				EB6E84890220204C2DB73F68 /* Provider.swift in Sources */,
+				512B8FD08A9352FCC3B99964 /* ProviderKeyView.swift in Sources */,
+				76AACE9B4B928BCB06830FC2 /* ProviderPickerView.swift in Sources */,
 				ECEA660ECA8B8E850FCA43DF /* QuotaAccessState.swift in Sources */,
 				7031B46ACC9BE0912CE71517 /* QuotaSnapshot.swift in Sources */,
 				90AAD478446CFA7DA803E1FF /* RootView.swift in Sources */,

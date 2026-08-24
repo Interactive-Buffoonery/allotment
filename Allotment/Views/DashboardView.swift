@@ -752,24 +752,6 @@ private struct LedgerRow: View {
     }
 }
 
-private struct Stamp: View {
-    let icon: String
-    let color: Color
-    var foreground = Color.alloStickerInk
-    var size: CGFloat = 39
-
-    var body: some View {
-        Image(systemName: icon)
-            .font(.system(size: size * 0.36, weight: .bold))
-            .foregroundStyle(foreground)
-            .frame(width: size, height: size)
-            .background(color)
-            .clipShape(Circle())
-            .overlay(Circle().strokeBorder(Color.alloOutline, lineWidth: 2))
-            .accessibilityHidden(true)
-    }
-}
-
 private struct RefillFact: View {
     let label: String
     let value: String
