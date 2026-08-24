@@ -3,7 +3,6 @@ import SwiftUI
 struct SettingsView: View {
     let store: UsageStore
 
-    @AppStorage(UsageLayout.storageKey) private var usageLayout = UsageLayout.bars.rawValue
     @AppStorage(AppAppearance.storageKey) private var appearance = AppAppearance.system.rawValue
     @State private var apiKey = ""
     @State private var keyMessage: String?
@@ -27,119 +26,11 @@ struct SettingsView: View {
                     .foregroundStyle(Color.alloMuted)
             }
 
-            layoutCard
             appearanceCard
             apiKeyCard
         }
         .frame(maxWidth: 700)
         .frame(maxWidth: .infinity, alignment: .leading)
-    }
-
-    private var layoutCard: some View {
-        VStack(alignment: .leading, spacing: 18) {
-            Text("PICK YOUR VIEW ✦")
-                .font(.system(.headline, design: .rounded, weight: .black))
-                .tracking(0.6)
-                .padding(.horizontal, 17)
-                .padding(.vertical, 11)
-                .background(Color.alloPink)
-                .stickerBorder(cornerRadius: 10, offset: 5)
-                .rotationEffect(.degrees(-1.4))
-                .accessibilityLabel("Pick your view")
-                .accessibilityAddTraits(.isHeader)
-
-            layoutButton(.bars, color: .alloMauve, rotation: -1.2)
-
-            Text("OR")
-                .font(.system(.caption, design: .rounded, weight: .black))
-                .padding(.horizontal, 13)
-                .padding(.vertical, 7)
-                .background(Color.alloPaper)
-                .notebookOutline(cornerRadius: 18)
-                .frame(maxWidth: .infinity)
-                .rotationEffect(.degrees(2))
-
-            layoutButton(.rings, color: .alloBlue, rotation: 1.1)
-        }
-    }
-
-    private func layoutButton(_ option: UsageLayout, color: Color, rotation: Double) -> some View {
-        Button {
-            usageLayout = option.rawValue
-        } label: {
-            HStack(spacing: 17) {
-                layoutPreview(option)
-
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(option.label)
-                        .font(.system(.title2, design: .rounded, weight: .black))
-                    Text(option == .bars ? "A playful gate ledger" : "Two quotas at a glance")
-                        .font(.subheadline.bold())
-                        .opacity(0.72)
-                }
-
-                Spacer()
-
-                if isSelected(option) {
-                    Image(systemName: "checkmark")
-                        .font(.headline.bold())
-                        .foregroundStyle(Color.alloPaper)
-                        .frame(width: 38, height: 38)
-                        .background(Color.alloInk)
-                        .clipShape(Circle())
-                        .accessibilityHidden(true)
-                }
-            }
-            .foregroundStyle(option == .bars ? Color.alloStickerInk : Color.alloInk)
-            .padding(.horizontal, 18)
-            .padding(.vertical, 20)
-            .background(color)
-            .stickerBorder(cornerRadius: 19, offset: 7)
-            .rotationEffect(.degrees(rotation))
-        }
-        .buttonStyle(.plain)
-        .accessibilityAddTraits(isSelected(option) ? .isSelected : [])
-        .accessibilityHint("Uses the \(option.label.lowercased()) quota layout on the Current tab")
-    }
-
-    @ViewBuilder
-    private func layoutPreview(_ option: UsageLayout) -> some View {
-        if option == .bars {
-            VStack(spacing: 7) {
-                miniBar(width: 50)
-                miniBar(width: 70)
-            }
-            .frame(width: 76, height: 54)
-        } else {
-            HStack(spacing: 7) {
-                miniRing(progress: 0.42)
-                miniRing(progress: 0.82)
-            }
-            .frame(width: 76, height: 54)
-        }
-    }
-
-    private func miniBar(width: CGFloat) -> some View {
-        ZStack(alignment: .leading) {
-            RoundedRectangle(cornerRadius: 4)
-                .fill(Color.white.opacity(0.48))
-                .frame(width: 70, height: 12)
-            RoundedRectangle(cornerRadius: 4)
-                .fill(Color.alloPurple)
-                .frame(width: width, height: 12)
-        }
-        .overlay(RoundedRectangle(cornerRadius: 4).stroke(Color.alloOutline, lineWidth: 2))
-    }
-
-    private func miniRing(progress: Double) -> some View {
-        ZStack {
-            Circle().stroke(Color.white.opacity(0.48), lineWidth: 7)
-            Circle()
-                .trim(from: 0, to: progress)
-                .stroke(Color.alloPurple, style: StrokeStyle(lineWidth: 7, lineCap: .round))
-                .rotationEffect(.degrees(-90))
-        }
-        .frame(width: 31, height: 31)
     }
 
     private var appearanceCard: some View {
@@ -253,10 +144,6 @@ struct SettingsView: View {
 
     private func isSelected(_ option: AppAppearance) -> Bool {
         AppAppearance(rawValue: appearance) == option
-    }
-
-    private func isSelected(_ option: UsageLayout) -> Bool {
-        UsageLayout(rawValue: usageLayout) == option
     }
 
     private func saveKey() {

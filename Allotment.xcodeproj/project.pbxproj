@@ -15,7 +15,6 @@
 		90AAD478446CFA7DA803E1FF /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1785C04AAB7D904B8DCAD8AC /* RootView.swift */; };
 		923AC05CCAB958FF388889EC /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = CF05F7863F9C62630E5FBCFF /* PrivacyInfo.xcprivacy */; };
 		A6D8B3E5B7869039D95B84B7 /* APIKeyStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F40224B19339E05D92309D3D /* APIKeyStore.swift */; };
-		A8D40CCE03B625EB5E920F8B /* UsageLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105CF9C9A95A1C77070975B2 /* UsageLayout.swift */; };
 		AD8CD4CE895EC8BC7DB2AF7F /* AllotmentApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B4F4CB8DF2DCF43269BDBD2 /* AllotmentApp.swift */; };
 		C036631AC14E53FBC455A089 /* Style.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D02F849B1ED88A42108EFA1 /* Style.swift */; };
 		D4D966883495EE4897AFCF4F /* UsageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBA16B5B6BCDDEE23B525B72 /* UsageStore.swift */; };
@@ -39,7 +38,6 @@
 /* Begin PBXFileReference section */
 		09E5B1F23EE08712651A2C7E /* Allotment.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Allotment.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0F9948C821B3CB301E39890A /* SetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupView.swift; sourceTree = "<group>"; };
-		105CF9C9A95A1C77070975B2 /* UsageLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageLayout.swift; sourceTree = "<group>"; };
 		1785C04AAB7D904B8DCAD8AC /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		1D02F849B1ED88A42108EFA1 /* Style.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Style.swift; sourceTree = "<group>"; };
 		2546AD143F1A82CB0B173E54 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
@@ -94,7 +92,6 @@
 			children = (
 				5B4F4CB8DF2DCF43269BDBD2 /* AllotmentApp.swift */,
 				B91A49F2882A186784001DBD /* AppAppearance.swift */,
-				105CF9C9A95A1C77070975B2 /* UsageLayout.swift */,
 				CBA16B5B6BCDDEE23B525B72 /* UsageStore.swift */,
 			);
 			path = App;
@@ -265,7 +262,6 @@
 				65DA7B94618B271377BD003E /* SetupView.swift in Sources */,
 				C036631AC14E53FBC455A089 /* Style.swift in Sources */,
 				773B21359E52C899A603EC97 /* SyntheticClient.swift in Sources */,
-				A8D40CCE03B625EB5E920F8B /* UsageLayout.swift in Sources */,
 				D4D966883495EE4897AFCF4F /* UsageStore.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

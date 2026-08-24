@@ -173,10 +173,7 @@ private struct CurrentUsageView: View {
     let lastUpdated: Date?
     let now: Date
     let refresh: () -> Void
-    @AppStorage(UsageLayout.storageKey) private var storedLayout = UsageLayout.bars.rawValue
     @Environment(\.horizontalSizeClass) private var sizeClass
-
-    private var layout: UsageLayout { UsageLayout(rawValue: storedLayout) ?? .bars }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 24) {
@@ -195,11 +192,11 @@ private struct CurrentUsageView: View {
                let weekly = snapshot.weeklyTokenLimit {
                 if sizeClass == .regular {
                     HStack(alignment: .top, spacing: 24) {
-                        quotaCard(weekly: weekly, rolling: rolling)
+                        QuotaBarsCard(weekly: weekly, rolling: rolling, lastUpdated: lastUpdated, now: now)
                         WeeklyPlannerCard(limit: weekly, now: now)
                     }
                 } else {
-                    quotaCard(weekly: weekly, rolling: rolling)
+                    QuotaBarsCard(weekly: weekly, rolling: rolling, lastUpdated: lastUpdated, now: now)
                     WeeklyPlannerCard(limit: weekly, now: now)
                 }
             } else if let subscription = snapshot.subscription {
@@ -210,16 +207,6 @@ private struct CurrentUsageView: View {
                     retry: refresh,
                     isError: true
                 )
-            }
-        }
-    }
-
-    private func quotaCard(weekly: WeeklyTokenLimit, rolling: RollingFiveHourLimit) -> some View {
-        Group {
-            if layout == .bars {
-                QuotaBarsCard(weekly: weekly, rolling: rolling, lastUpdated: lastUpdated, now: now)
-            } else {
-                QuotaRingsCard(weekly: weekly, rolling: rolling, lastUpdated: lastUpdated, now: now)
             }
         }
     }
@@ -364,117 +351,6 @@ private struct SegmentedQuotaBar: View {
         .frame(height: 18)
         .clipShape(RoundedRectangle(cornerRadius: 6))
         .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(Color.alloOutline, lineWidth: 2))
-    }
-}
-
-private struct QuotaRingsCard: View {
-    let weekly: WeeklyTokenLimit
-    let rolling: RollingFiveHourLimit
-    let lastUpdated: Date?
-    let now: Date
-    @Environment(\.horizontalSizeClass) private var sizeClass
-
-    private var state: QuotaAccessState {
-        QuotaAccessState(weeklyRemaining: weekly.remaining, requestRemaining: rolling.remaining)
-    }
-
-    private var ringSize: CGFloat { sizeClass == .compact ? 94 : 114 }
-
-    var body: some View {
-        let weeklyMaximumUSD = weekly.maximum.formatted(.currency(code: "USD"))
-        let weeklyRemainingUSD = weekly.remaining.formatted(.currency(code: "USD"))
-        let weeklyRefillUSD = weekly.refillAmount.formatted(.currency(code: "USD"))
-
-        VStack(spacing: 0) {
-            if !state.isReady {
-                GateStatusBadge(state: state)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(20)
-
-                DashedDivider()
-            }
-
-            HStack(alignment: .top, spacing: 8) {
-                QuotaRing(
-                    title: "Weekly credits",
-                    subtitle: "of \(weeklyMaximumUSD)",
-                    value: weeklyRemainingUSD,
-                    progress: ratio(weekly.remaining, weekly.maximum),
-                    color: .alloPurple,
-                    refill: "+\(weeklyRefillUSD) / 3h 22m",
-                    size: ringSize
-                )
-
-                AndBadge()
-                    .rotationEffect(.degrees(-4))
-                    .padding(.top, sizeClass == .compact ? 42 : 51)
-
-                QuotaRing(
-                    title: "Five-hour requests",
-                    subtitle: "of \(format(rolling.max))",
-                    value: format(rolling.remaining),
-                    progress: ratio(rolling.remaining, rolling.max),
-                    color: .alloRequestFill,
-                    refill: "+\(format(rolling.refillAmount)) / 15m",
-                    size: ringSize
-                )
-            }
-            .padding(.horizontal, 13)
-            .padding(.vertical, 22)
-
-            DashedDivider()
-            NextRefillBand(weekly: weekly, rolling: rolling, lastUpdated: lastUpdated, now: now)
-        }
-        .background(Color.alloPaper)
-        .stickerBorder(cornerRadius: 24, offset: 7)
-        .accessibilityElement(children: .contain)
-    }
-}
-
-private struct QuotaRing: View {
-    let title: String
-    let subtitle: String
-    let value: String
-    let progress: Double
-    let color: Color
-    let refill: String
-    var size: CGFloat = 114
-
-    var body: some View {
-        VStack(spacing: 10) {
-            ZStack {
-                Circle()
-                    .stroke(Color.alloInk.opacity(0.10), lineWidth: 14)
-                Circle()
-                    .trim(from: 0, to: min(max(progress, 0), 1))
-                    .stroke(color, style: StrokeStyle(lineWidth: 14, lineCap: .round))
-                    .rotationEffect(.degrees(-90))
-
-                VStack(spacing: 1) {
-                    Text(value)
-                        .font(.system(.headline, design: .rounded, weight: .black))
-                        .minimumScaleFactor(0.5)
-                        .lineLimit(1)
-                    Text(subtitle)
-                        .font(.caption2.bold())
-                        .foregroundStyle(Color.alloMuted)
-                }
-                .padding(10)
-            }
-            .frame(width: size, height: size)
-
-            Text(title)
-                .font(.system(.subheadline, design: .rounded, weight: .bold))
-                .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
-            Text(refill)
-                .font(.caption2.bold())
-                .foregroundStyle(Color.alloMuted)
-                .multilineTextAlignment(.center)
-        }
-        .frame(maxWidth: .infinity)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\(title), \(value) \(subtitle), \(refill)")
     }
 }
 
