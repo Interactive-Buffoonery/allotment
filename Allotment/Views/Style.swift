@@ -82,6 +82,6 @@ private struct StickerBorder: ViewModifier {
 
 extension Font {
     static func alloWordmark(size: CGFloat) -> Font {
-        .system(size: size, weight: .black, design: .rounded)
+        .custom("Fraunces-SemiBold", size: size)
     }
 }

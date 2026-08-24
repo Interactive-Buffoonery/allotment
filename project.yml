@@ -20,6 +20,8 @@ targets:
       path: Allotment/Info.plist
       properties:
         CFBundleDisplayName: Allotment
+        UIAppFonts:
+          - Fraunces-SemiBold.ttf
         ITSAppUsesNonExemptEncryption: false
         UIApplicationSceneManifest:
           UIApplicationSupportsMultipleScenes: false
