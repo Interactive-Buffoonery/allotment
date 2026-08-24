@@ -27,11 +27,26 @@
 
 ## 2. Theme
 
-- **Accent color:** purple → leaf green. Existing theme already carries it as `synRequestFill` (light `#47B08C`, dark `#61C29E`). AccentColor.colorset updated to match; TabView tint moves from `.synPurple` to green.
-- **Weekly credits bar:** gold fill (`synWeeklyFill`) → purple. Removes the last gold accent per reviewer feedback.
-- **Refresh button:** yellow circle → purple.
+- **Accent color:** purple → leaf green. The existing `synRequestFill` light value (#47B08C) is too light for text/icon roles — **2.62:1 on paper, fails both AA-text and UI-component minimums** (the current purple tint has the same bug, 3.79 for tab labels). Accent light value deepens to `rgb(0.14, 0.51, 0.37)` (#25855B ≈ 4.6:1 on paper) and serves both roles: tint text/icons AND bar fills (clears 3.3:1 vs the ink@11% track). Dark-mode accent keeps `#61C29E` (fine on dark paper).
+- **Weekly credits bar:** gold fill (`synWeeklyFill`) → purple (3.5:1 vs track, passes UI-component AA). Removes the last gold accent per reviewer feedback.
+- **Refresh button:** yellow circle → purple with **ink-colored** icon (white-on-purple is only 3.62:1, fails for text; icon role needs 3:1 and clears it, but ink reads better).
+- **CTA buttons stay yellow + ink text** (11.9:1, AAA) — do not switch to purple/white (3.62:1, fails).
 - **Weekly refill planner card background:** stays yellow (it's a deliberate sticky-note moment, not an accent).
 - Everything else in `Style.swift` — sticker borders, dot-grid background, shadows, card styles — untouched.
+
+- **`synYellow` → mauve `#c6a0f6`** (Catppuccin Macchiato), applied to all yellow surfaces: planner card background, CTA buttons ("Save provider", "Update Key"), range-picker selected pill, gate-status badge background. Single value used identically in light and dark mode. Ink text on mauve: 6.4:1 AAA. The planner's inner slider keeps the deeper purple so controls read against the card.
+
+**Light-mode contrast audit (WCAG), after fixes:** AA everywhere. Ratios on record: ink/paper 13.5, muted/paper 5.0, ink/pink 8.0, plannerInk/mauve 6.4, ink/blue 10.9, ink/mint 9.6, error-on-tint 5.2, purple fill/track 3.5, deepened green/paper (tint + text) 4.6.
+
+### Dark mode v2 ("stickers stay stickers")
+
+v1 dark mode was a mechanical inversion — accents became muddy mid-tones (#8C426B pink, #295E4A mint) with light text at 2.9–3.4:1, failing AA. v2 rule:
+
+- **Surfaces go dark; accent fills do not.** Background stays #120F1A, paper cards lift to `rgb(0.15, 0.13, 0.20)` (#262233), outline keeps #998FC2.
+- **Every accent fill (pink, mint, blue, mauve) keeps its light value in dark mode, with dark ink text** (`synPlannerInk` generalized to `alloStickerInk`, applied to all text-on-accent). This is the rule the yellow planner already followed — it's now universal.
+- **Sticker shadows in dark** switch from near-black to a purple glow `rgba(171, 150, 240, 0.35)` — black shadows are invisible on near-black.
+- **Bar fills** (green, purple) stay mid-tone brights in both modes; chart day-colors follow the same pastel rule with dark annotations.
+- Result: every text-on-accent pair is 6.4:1 or better in both modes, AAA, with no per-pair tuning.
 
 ## 3. Typography
 
