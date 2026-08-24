@@ -4,12 +4,7 @@ struct SettingsView: View {
     let store: UsageStore
 
     @AppStorage(AppAppearance.storageKey) private var appearance = AppAppearance.system.rawValue
-    @State private var apiKey = ""
-    @State private var keyMessage: String?
-    @State private var keyMessageIsError = false
     @State private var showDisconnectConfirmation = false
-    @FocusState private var isKeyFocused: Bool
-    @AccessibilityFocusState private var isKeyMessageFocused: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: 22) {
@@ -26,11 +21,121 @@ struct SettingsView: View {
                     .foregroundStyle(Color.alloMuted)
             }
 
+            providersSection
             appearanceCard
-            apiKeyCard
+            iCloudSection
         }
         .frame(maxWidth: 700)
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var providersSection: some View {
+        VStack(alignment: .leading, spacing: 15) {
+            VStack(alignment: .leading, spacing: 3) {
+                Text("Providers")
+                    .font(.system(.title2, design: .rounded, weight: .bold))
+                Text("Keys live in this device's Keychain.")
+                    .font(.subheadline)
+                    .foregroundStyle(Color.alloMuted)
+            }
+
+            ForEach(Provider.allCases, id: \.self) { provider in
+                if store.hasAPIKey {
+                    NavigationLink {
+                        ZStack {
+                            DotBackground()
+                            ScrollView {
+                                ProviderKeyView(store: store, provider: provider, onboarding: false)
+                            }
+                        }
+                    } label: {
+                        providerRow(provider)
+                    }
+                    .buttonStyle(.plain)
+                } else {
+                    providerRow(provider)
+                }
+            }
+
+            NavigationLink {
+                ZStack {
+                    DotBackground()
+                    ScrollView {
+                        ProviderPickerView(store: store, showsHero: false)
+                    }
+                }
+                .navigationDestination(for: Provider.self) { provider in
+                    ZStack {
+                        DotBackground()
+                        ScrollView {
+                            ProviderKeyView(store: store, provider: provider, onboarding: false)
+                        }
+                    }
+                }
+            } label: {
+                HStack(spacing: 15) {
+                    Image(systemName: "plus")
+                        .font(.headline)
+                        .frame(width: 39, height: 39)
+                        .overlay(Circle().strokeBorder(Color.alloMuted, style: StrokeStyle(lineWidth: 2, dash: [5, 4])))
+                    Text("Add provider")
+                        .font(.system(.title3, design: .rounded, weight: .bold))
+                    Spacer()
+                }
+                .foregroundStyle(Color.alloMuted)
+                .padding(.horizontal, 18)
+                .padding(.vertical, 14)
+                .overlay(RoundedRectangle(cornerRadius: 18).strokeBorder(Color.alloMuted.opacity(0.6), style: StrokeStyle(lineWidth: 1.5, dash: [6, 5])))
+            }
+            .buttonStyle(.plain)
+
+            if store.hasAPIKey {
+                Button("Disconnect Synthetic", role: .destructive) {
+                    showDisconnectConfirmation = true
+                }
+                .font(.subheadline.bold())
+                .frame(maxWidth: .infinity, minHeight: 44)
+            }
+        }
+        .padding(19)
+        .background(Color.alloPaper)
+        .stickerBorder(cornerRadius: 22)
+        .confirmationDialog(
+            "Disconnect Synthetic?",
+            isPresented: $showDisconnectConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Disconnect", role: .destructive) {
+                store.disconnect()
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Your saved history will remain on this device.")
+        }
+    }
+
+    private func providerRow(_ provider: Provider) -> some View {
+        HStack(spacing: 15) {
+            Stamp(icon: provider.icon, color: .alloMint, size: 46)
+            VStack(alignment: .leading, spacing: 3) {
+                Text(provider.displayName)
+                    .font(.system(.headline, design: .rounded, weight: .bold))
+                Text(store.hasAPIKey ? "Key on this device" : "No key saved yet")
+                    .font(.subheadline)
+                    .foregroundStyle(Color.alloMuted)
+            }
+            Spacer()
+            if store.hasAPIKey {
+                Image(systemName: "chevron.right")
+                    .font(.subheadline.bold())
+                    .foregroundStyle(Color.alloMuted)
+                    .accessibilityHidden(true)
+            }
+        }
+        .padding(.horizontal, 18)
+        .padding(.vertical, 14)
+        .background(Color.alloInk.opacity(0.05))
+        .notebookOutline(cornerRadius: 14)
     }
 
     private var appearanceCard: some View {
@@ -72,93 +177,26 @@ struct SettingsView: View {
         .stickerBorder(cornerRadius: 22)
     }
 
-    private var apiKeyCard: some View {
-        VStack(alignment: .leading, spacing: 15) {
-            VStack(alignment: .leading, spacing: 3) {
-                Text("Synthetic API Key")
+    private var iCloudSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 10) {
+                Text("iCloud Sync")
                     .font(.system(.title2, design: .rounded, weight: .bold))
-                Text(store.hasAPIKey ? "A key is saved on this device." : "No key saved yet — add one to connect.")
-                    .font(.subheadline)
-                    .foregroundStyle(Color.alloMuted)
+                ComingSoonChip()
             }
-
-            SecureField("syn_…", text: $apiKey)
-                .accessibilityLabel("Synthetic API key")
-                .textInputAutocapitalization(.never)
-                .autocorrectionDisabled()
-                .textContentType(.password)
-                .focused($isKeyFocused)
-                .padding(16)
-                .background(Color.alloInk.opacity(0.06))
-                .notebookOutline(cornerRadius: 14)
-
-            if let keyMessage {
-                Text(keyMessage)
-                    .font(.footnote)
-                    .foregroundStyle(keyMessageIsError ? Color.alloError : Color.alloMuted)
-                    .accessibilityFocused($isKeyMessageFocused)
-            }
-
-            Button {
-                saveKey()
-            } label: {
-                Text(store.hasAPIKey ? "Update Key" : "Save Key")
-                    .font(.headline)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 15)
-            }
-            .buttonStyle(.plain)
-            .foregroundStyle(Color.alloStickerInk)
-            .background(Color.alloMauve)
-            .stickerBorder()
-            .disabled(apiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-
-            if store.hasAPIKey {
-                Button("Disconnect Synthetic", role: .destructive) {
-                    showDisconnectConfirmation = true
-                }
-                .font(.subheadline.bold())
-                .frame(maxWidth: .infinity, minHeight: 44)
-            }
-
-            Text("Your key stays in this device's Keychain.")
-                .font(.footnote)
+            Text("Sync providers, keys, and history across your devices.")
+                .font(.subheadline)
                 .foregroundStyle(Color.alloMuted)
         }
+        .opacity(0.55)
         .padding(19)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color.alloPaper)
         .stickerBorder(cornerRadius: 22)
-        .confirmationDialog(
-            "Disconnect Synthetic?",
-            isPresented: $showDisconnectConfirmation,
-            titleVisibility: .visible
-        ) {
-            Button("Disconnect", role: .destructive) {
-                store.disconnect()
-            }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("Your saved history will remain on this device.")
-        }
+        .accessibilityElement(children: .combine)
     }
 
     private func isSelected(_ option: AppAppearance) -> Bool {
         AppAppearance(rawValue: appearance) == option
-    }
-
-    private func saveKey() {
-        do {
-            try store.saveAPIKey(apiKey)
-            apiKey = ""
-            keyMessage = "API key saved."
-            keyMessageIsError = false
-            isKeyFocused = false
-            isKeyMessageFocused = true
-            Task { await store.refresh() }
-        } catch {
-            keyMessage = error.localizedDescription
-            keyMessageIsError = true
-            isKeyMessageFocused = true
-        }
     }
 }
