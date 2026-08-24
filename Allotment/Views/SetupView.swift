@@ -13,14 +13,14 @@ struct SetupView: View {
             ScrollView {
                 VStack(spacing: 28) {
                     Spacer(minLength: 20)
-                    Text("SYNVIEW ✿")
+                    Text("ALLOTMENT ✿")
                         .font(.system(.title2, design: .rounded, weight: .black))
                         .padding(.horizontal, 18)
                         .padding(.vertical, 12)
-                        .background(Color.synPink)
-                        .stickerBorder(shadow: .synInkShadow)
+                        .background(Color.alloPink)
+                        .stickerBorder(shadow: .alloInkShadow)
                         .rotationEffect(.degrees(-2))
-                        .accessibilityLabel("SynView")
+                        .accessibilityLabel("Allotment")
                         .accessibilityAddTraits(.isHeader)
 
                     VStack(spacing: 10) {
@@ -28,7 +28,7 @@ struct SetupView: View {
                             .font(.system(.largeTitle, design: .rounded, weight: .bold))
                             .accessibilityAddTraits(.isHeader)
                         Text("Track your Synthetic limits, refills, and history from your device.")
-                            .foregroundStyle(Color.synMuted)
+                            .foregroundStyle(Color.alloMuted)
                             .multilineTextAlignment(.center)
                             .fixedSize(horizontal: false, vertical: true)
                     }
@@ -36,7 +36,7 @@ struct SetupView: View {
                     VStack(alignment: .leading, spacing: 10) {
                         Text("SYNTHETIC API KEY")
                             .font(.caption.bold())
-                            .foregroundStyle(Color.synMuted)
+                            .foregroundStyle(Color.alloMuted)
                         SecureField("syn_…", text: $apiKey)
                             .accessibilityLabel("Synthetic API key")
                             .textInputAutocapitalization(.never)
@@ -44,12 +44,12 @@ struct SetupView: View {
                             .textContentType(.password)
                             .focused($isKeyFocused)
                             .padding(16)
-                            .background(Color.synPaper)
+                            .background(Color.alloPaper)
                             .notebookOutline(cornerRadius: 14)
                         if let errorMessage {
                             Text(errorMessage)
                                 .font(.footnote)
-                                .foregroundStyle(Color.synError)
+                                .foregroundStyle(Color.alloError)
                                 .accessibilityFocused($isErrorMessageFocused)
                         }
                     }
@@ -63,13 +63,13 @@ struct SetupView: View {
                             .padding(.vertical, 15)
                     }
                     .buttonStyle(.plain)
-                    .background(Color.synYellow)
+                    .background(Color.alloYellow)
                     .stickerBorder()
                     .disabled(apiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
 
                     Text("Your key stays in this device's Keychain.")
                         .font(.footnote)
-                        .foregroundStyle(Color.synMuted)
+                        .foregroundStyle(Color.alloMuted)
                     Spacer(minLength: 20)
                 }
                 .padding(24)

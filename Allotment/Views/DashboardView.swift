@@ -42,8 +42,8 @@ struct DashboardView: View {
                 .tabItem { Label("Settings", systemImage: "gearshape.fill") }
                 .tag(AppTab.settings)
             }
-            .tint(.synPurple)
-            .toolbarBackground(Color.synPaper, for: .tabBar)
+            .tint(.alloPurple)
+            .toolbarBackground(Color.alloPaper, for: .tabBar)
             .toolbarBackground(.visible, for: .tabBar)
             .task {
                 if store.snapshot == nil { await store.refresh() }
@@ -58,7 +58,7 @@ struct DashboardView: View {
                 .padding(.top, 14)
                 .padding(.bottom, 32)
         }
-        .foregroundStyle(Color.synInk)
+        .foregroundStyle(Color.alloInk)
     }
 }
 
@@ -68,13 +68,13 @@ private struct CurrentHeader: View {
     var body: some View {
         HStack(alignment: .center) {
             VStack(alignment: .leading, spacing: 3) {
-                Text("SynView")
-                    .font(.synWordmark(size: 44))
+                Text("Allotment")
+                    .font(.alloWordmark(size: 44))
                     .accessibilityAddTraits(.isHeader)
                 Text("QUOTA NOTEBOOK")
                     .font(.caption.bold())
                     .tracking(0.6)
-                    .foregroundStyle(Color.synMuted)
+                    .foregroundStyle(Color.alloMuted)
                     .accessibilityHidden(true)
             }
 
@@ -85,16 +85,16 @@ private struct CurrentHeader: View {
             } label: {
                 Image(systemName: "arrow.clockwise")
                     .font(.system(size: 20, weight: .black))
-                    .foregroundStyle(Color.synPlannerInk)
+                    .foregroundStyle(Color.alloPlannerInk)
                     .frame(width: 47, height: 47)
-                    .background(Color.synYellow)
+                    .background(Color.alloYellow)
                     .clipShape(Circle())
                     .background {
                         Circle()
-                            .fill(Color.synInkShadow)
+                            .fill(Color.alloInkShadow)
                             .offset(x: 3, y: 3)
                     }
-                    .overlay(Circle().strokeBorder(Color.synOutline, lineWidth: 2))
+                    .overlay(Circle().strokeBorder(Color.alloOutline, lineWidth: 2))
             }
             .buttonStyle(.plain)
             .disabled(store.isLoading)
@@ -131,8 +131,8 @@ private struct CurrentUsageContent: View {
         } else if store.isLoading {
             ProgressView("Checking Synthetic…")
                 .font(.system(.body, design: .rounded))
-                .foregroundStyle(Color.synInk)
-                .tint(.synInk)
+                .foregroundStyle(Color.alloInk)
+                .tint(.alloInk)
                 .frame(maxWidth: .infinity)
                 .padding(.top, 70)
         } else {
@@ -159,12 +159,12 @@ private struct StaleDataBanner: View {
             Text("Couldn't refresh — showing last known data.")
                 .font(.caption.bold())
         }
-        .foregroundStyle(Color.synError)
+        .foregroundStyle(Color.alloError)
         .padding(12)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.synError.opacity(0.12))
+        .background(Color.alloError.opacity(0.12))
         .clipShape(RoundedRectangle(cornerRadius: 12))
-        .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(Color.synError.opacity(0.4), lineWidth: 1.5))
+        .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(Color.alloError.opacity(0.4), lineWidth: 1.5))
     }
 }
 
@@ -185,8 +185,8 @@ private struct CurrentUsageView: View {
                 .tracking(0.5)
                 .padding(.horizontal, 17)
                 .padding(.vertical, 11)
-                .background(Color.synPink)
-                .stickerBorder(shadow: .synInkShadow, cornerRadius: 10, offset: 5)
+                .background(Color.alloPink)
+                .stickerBorder(shadow: .alloInkShadow, cornerRadius: 10, offset: 5)
                 .rotationEffect(.degrees(-2))
                 .accessibilityLabel("Today's check-in")
                 .accessibilityAddTraits(.isHeader)
@@ -251,14 +251,14 @@ private struct QuotaBarsCard: View {
 
             GateBarSection(
                 icon: "diamond",
-                iconColor: .synYellow,
-                iconForeground: .synPlannerInk,
+                iconColor: .alloYellow,
+                iconForeground: .alloPlannerInk,
                 title: "Weekly credits",
                 subtitle: "Long-term spending budget",
                 value: weeklyRemainingUSD,
                 maximum: "of \(weeklyMaximumUSD)",
                 progress: ratio(weekly.remaining, weekly.maximum),
-                fill: .synWeeklyFill,
+                fill: .alloWeeklyFill,
                 refill: "+\(weeklyRefillUSD) every 3h 22m"
             )
 
@@ -268,20 +268,20 @@ private struct QuotaBarsCard: View {
 
             GateBarSection(
                 icon: "clock",
-                iconColor: .synBlue,
+                iconColor: .alloBlue,
                 title: "Five-hour requests",
                 subtitle: "Short-term request capacity",
                 value: format(rolling.remaining),
                 maximum: "of \(format(rolling.max))",
                 progress: ratio(rolling.remaining, rolling.max),
-                fill: .synRequestFill,
+                fill: .alloRequestFill,
                 refill: "+\(format(rolling.refillAmount)) every 15m"
             )
 
             DashedDivider()
             NextRefillBand(weekly: weekly, rolling: rolling, lastUpdated: lastUpdated, now: now)
         }
-        .background(Color.synPaper)
+        .background(Color.alloPaper)
         .stickerBorder(cornerRadius: 24, offset: 7)
         .accessibilityElement(children: .contain)
     }
@@ -290,7 +290,7 @@ private struct QuotaBarsCard: View {
 private struct GateBarSection: View {
     let icon: String
     let iconColor: Color
-    var iconForeground = Color.synInk
+    var iconForeground = Color.alloInk
     let title: String
     let subtitle: String
     let value: String
@@ -308,7 +308,7 @@ private struct GateBarSection: View {
                         .font(.system(.headline, design: .rounded, weight: .bold))
                     Text(subtitle)
                         .font(.subheadline)
-                        .foregroundStyle(Color.synMuted)
+                        .foregroundStyle(Color.alloMuted)
                 }
                 Spacer(minLength: 8)
                 VStack(alignment: .trailing, spacing: 1) {
@@ -317,7 +317,7 @@ private struct GateBarSection: View {
                         .minimumScaleFactor(0.75)
                     Text(maximum)
                         .font(.caption.bold())
-                        .foregroundStyle(Color.synMuted)
+                        .foregroundStyle(Color.alloMuted)
                 }
             }
 
@@ -326,7 +326,7 @@ private struct GateBarSection: View {
 
             Text(refill)
                 .font(.system(.subheadline, design: .rounded, weight: .medium))
-                .foregroundStyle(Color.synMuted)
+                .foregroundStyle(Color.alloMuted)
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 18)
@@ -344,7 +344,7 @@ private struct SegmentedQuotaBar: View {
             let clamped = min(max(progress, 0), 1)
             let fillWidth = size.width * clamped
 
-            context.fill(Path(CGRect(origin: .zero, size: size)), with: .color(Color.synInk.opacity(0.11)))
+            context.fill(Path(CGRect(origin: .zero, size: size)), with: .color(Color.alloInk.opacity(0.11)))
 
             if fillWidth > 0 {
                 var fillRect = CGRect(origin: .zero, size: size)
@@ -358,12 +358,12 @@ private struct SegmentedQuotaBar: View {
                 var path = Path()
                 path.move(to: CGPoint(x: x, y: 0))
                 path.addLine(to: CGPoint(x: x, y: size.height))
-                context.stroke(path, with: .color(Color.synOutline.opacity(0.54)), lineWidth: 1.5)
+                context.stroke(path, with: .color(Color.alloOutline.opacity(0.54)), lineWidth: 1.5)
             }
         }
         .frame(height: 18)
         .clipShape(RoundedRectangle(cornerRadius: 6))
-        .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(Color.synOutline, lineWidth: 2))
+        .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(Color.alloOutline, lineWidth: 2))
     }
 }
 
@@ -400,7 +400,7 @@ private struct QuotaRingsCard: View {
                     subtitle: "of \(weeklyMaximumUSD)",
                     value: weeklyRemainingUSD,
                     progress: ratio(weekly.remaining, weekly.maximum),
-                    color: .synWeeklyFill,
+                    color: .alloWeeklyFill,
                     refill: "+\(weeklyRefillUSD) / 3h 22m",
                     size: ringSize
                 )
@@ -414,7 +414,7 @@ private struct QuotaRingsCard: View {
                     subtitle: "of \(format(rolling.max))",
                     value: format(rolling.remaining),
                     progress: ratio(rolling.remaining, rolling.max),
-                    color: .synRequestFill,
+                    color: .alloRequestFill,
                     refill: "+\(format(rolling.refillAmount)) / 15m",
                     size: ringSize
                 )
@@ -425,7 +425,7 @@ private struct QuotaRingsCard: View {
             DashedDivider()
             NextRefillBand(weekly: weekly, rolling: rolling, lastUpdated: lastUpdated, now: now)
         }
-        .background(Color.synPaper)
+        .background(Color.alloPaper)
         .stickerBorder(cornerRadius: 24, offset: 7)
         .accessibilityElement(children: .contain)
     }
@@ -444,7 +444,7 @@ private struct QuotaRing: View {
         VStack(spacing: 10) {
             ZStack {
                 Circle()
-                    .stroke(Color.synInk.opacity(0.10), lineWidth: 14)
+                    .stroke(Color.alloInk.opacity(0.10), lineWidth: 14)
                 Circle()
                     .trim(from: 0, to: min(max(progress, 0), 1))
                     .stroke(color, style: StrokeStyle(lineWidth: 14, lineCap: .round))
@@ -457,7 +457,7 @@ private struct QuotaRing: View {
                         .lineLimit(1)
                     Text(subtitle)
                         .font(.caption2.bold())
-                        .foregroundStyle(Color.synMuted)
+                        .foregroundStyle(Color.alloMuted)
                 }
                 .padding(10)
             }
@@ -469,7 +469,7 @@ private struct QuotaRing: View {
                 .fixedSize(horizontal: false, vertical: true)
             Text(refill)
                 .font(.caption2.bold())
-                .foregroundStyle(Color.synMuted)
+                .foregroundStyle(Color.alloMuted)
                 .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity)
@@ -485,18 +485,18 @@ private struct GateStatusBadge: View {
     var body: some View {
         HStack(spacing: 9) {
             Circle()
-                .fill(state.isReady ? Color.synRequestFill : Color.synWeeklyFill)
+                .fill(state.isReady ? Color.alloRequestFill : Color.alloWeeklyFill)
                 .frame(width: 12, height: 12)
-                .overlay(Circle().strokeBorder(Color.synOutline.opacity(0.45), lineWidth: 1))
+                .overlay(Circle().strokeBorder(Color.alloOutline.opacity(0.45), lineWidth: 1))
             Text(state.title.uppercased())
                 .font(.system(.subheadline, design: .rounded, weight: .black))
                 .tracking(0.7)
         }
-        .foregroundStyle(colorScheme == .dark && state.isReady ? Color.synInk : Color.synPlannerInk)
+        .foregroundStyle(colorScheme == .dark && state.isReady ? Color.alloInk : Color.alloPlannerInk)
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
-        .background(state.isReady ? Color.synMint : Color.synYellow)
-        .stickerBorder(shadow: .synInkShadow, cornerRadius: 22, offset: 3)
+        .background(state.isReady ? Color.alloMint : Color.alloYellow)
+        .stickerBorder(shadow: .alloInkShadow, cornerRadius: 22, offset: 3)
         .accessibilityElement(children: .combine)
     }
 }
@@ -508,8 +508,8 @@ private struct AndBadge: View {
             .tracking(0.6)
             .padding(.horizontal, 13)
             .padding(.vertical, 7)
-            .background(Color.synPaper)
-            .stickerBorder(shadow: .synInkShadow, cornerRadius: 18, offset: 3)
+            .background(Color.alloPaper)
+            .stickerBorder(shadow: .alloInkShadow, cornerRadius: 18, offset: 3)
             .accessibilityHidden(true)
     }
 }
@@ -522,11 +522,11 @@ private struct NextRefillBand: View {
 
     var body: some View {
         HStack(spacing: 13) {
-            Stamp(icon: "clock.arrow.circlepath", color: .synMint, size: 46)
+            Stamp(icon: "clock.arrow.circlepath", color: .alloMint, size: 46)
             VStack(alignment: .leading, spacing: 2) {
                 Text("NEXT REFILL")
                     .font(.caption2.bold())
-                    .foregroundStyle(Color.synMuted)
+                    .foregroundStyle(Color.alloMuted)
                 Text(nextRefillText(now: now))
                     .font(.system(.subheadline, design: .rounded, weight: .bold))
             }
@@ -534,13 +534,13 @@ private struct NextRefillBand: View {
             if let lastUpdated {
                 Text(lastUpdated, format: lastUpdatedFormat(lastUpdated))
                     .font(.caption2.bold())
-                    .foregroundStyle(Color.synMuted)
+                    .foregroundStyle(Color.alloMuted)
                     .accessibilityLabel("Last checked \(lastUpdated.formatted(date: .abbreviated, time: .shortened))")
             }
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 16)
-        .background(Color.synPurple.opacity(0.10))
+        .background(Color.alloPurple.opacity(0.10))
     }
 
     private func lastUpdatedFormat(_ date: Date) -> Date.FormatStyle {
@@ -569,18 +569,18 @@ private struct LegacyLedgerCard: View {
             VStack(alignment: .leading, spacing: 7) {
                 Text("REQUESTS AVAILABLE")
                     .font(.caption.bold())
-                    .foregroundStyle(Color.synMuted)
+                    .foregroundStyle(Color.alloMuted)
                 Text("\(format(max(0, quota.limit - quota.requests))) / \(format(quota.limit))")
                     .font(.system(size: 42, weight: .bold, design: .rounded))
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(21)
             DashedDivider()
-            LedgerRow(icon: "arrow.up.right", color: .synMint, label: "USED CAPACITY", value: format(quota.requests), trailing: percent(quota.requests / max(1, quota.limit)))
+            LedgerRow(icon: "arrow.up.right", color: .alloMint, label: "USED CAPACITY", value: format(quota.requests), trailing: percent(quota.requests / max(1, quota.limit)))
             Divider().padding(.leading, 72)
-            LedgerRow(icon: "checkmark", color: .synPink, label: "LAST CHECKED", value: lastUpdated?.formatted(date: .omitted, time: .shortened) ?? "Just now", trailing: "LIVE")
+            LedgerRow(icon: "checkmark", color: .alloPink, label: "LAST CHECKED", value: lastUpdated?.formatted(date: .omitted, time: .shortened) ?? "Just now", trailing: "LIVE")
         }
-        .background(Color.synPaper)
+        .background(Color.alloPaper)
         .stickerBorder(cornerRadius: 22)
     }
 }
@@ -612,12 +612,12 @@ private struct WeeklyPlannerCard: View {
                 VStack(alignment: .leading, spacing: 3) {
                     Text("AVAILABLE NOW")
                         .font(.caption2.bold())
-                        .foregroundStyle(Color.synPlannerInk.opacity(0.85))
+                        .foregroundStyle(Color.alloPlannerInk.opacity(0.85))
                     Text(remainingUSD)
                         .font(.system(.title2, design: .rounded, weight: .black))
                     Text("of \(maximumUSD)")
                         .font(.caption.bold())
-                        .foregroundStyle(Color.synPlannerInk.opacity(0.85))
+                        .foregroundStyle(Color.alloPlannerInk.opacity(0.85))
                 }
                 Spacer()
                 let pct = percent(limit.percentRemaining / 100)
@@ -625,8 +625,8 @@ private struct WeeklyPlannerCard: View {
                     .font(.system(.subheadline, design: .rounded, weight: .black))
                     .padding(.horizontal, 10)
                     .padding(.vertical, 7)
-                    .background(Color.synMint)
-                    .stickerBorder(shadow: .synInkShadow, cornerRadius: 9, offset: 3)
+                    .background(Color.alloMint)
+                    .stickerBorder(shadow: .alloInkShadow, cornerRadius: 9, offset: 3)
                     .rotationEffect(.degrees(2))
                     .accessibilityLabel("\(pct) remaining")
             }
@@ -643,7 +643,7 @@ private struct WeeklyPlannerCard: View {
             }
 
             if limit.remaining < limit.maximum, limit.refillAmount > 0 {
-                DashedDivider(color: Color.synPlannerInk.opacity(0.34))
+                DashedDivider(color: Color.alloPlannerInk.opacity(0.34))
 
                 HStack {
                     Text("I want available")
@@ -654,16 +654,16 @@ private struct WeeklyPlannerCard: View {
                 }
 
                 Slider(value: $target, in: limit.remaining...limit.maximum, step: limit.refillAmount)
-                    .tint(.synPurple)
+                    .tint(.alloPurple)
                     .accessibilityLabel("Target weekly reserve")
                     .accessibilityValue(Text(target, format: .currency(code: "USD")))
 
                 HStack(spacing: 12) {
-                    Stamp(icon: "clock", color: Color.synPurple.opacity(0.25))
+                    Stamp(icon: "clock", color: Color.alloPurple.opacity(0.25))
                     VStack(alignment: .leading, spacing: 3) {
                         Text("IF YOU PAUSE NEW USAGE")
                             .font(.caption2.bold())
-                            .foregroundStyle(Color.synPlannerInk.opacity(0.85))
+                            .foregroundStyle(Color.alloPlannerInk.opacity(0.85))
                         Text("You'll reach that in about \(duration(limit.timeToReach(target, now: now))).")
                             .font(.subheadline.bold())
                     }
@@ -676,10 +676,10 @@ private struct WeeklyPlannerCard: View {
                     .font(.subheadline.bold())
             }
         }
-        .foregroundStyle(Color.synPlannerInk)
+        .foregroundStyle(Color.alloPlannerInk)
         .padding(19)
-        .background(Color.synYellow)
-        .stickerBorder(shadow: .synInkShadow, cornerRadius: 20, offset: 6)
+        .background(Color.alloYellow)
+        .stickerBorder(shadow: .alloInkShadow, cornerRadius: 20, offset: 6)
         .rotationEffect(.degrees(0.6))
         .onChange(of: limit) { _, newLimit in
             target = min(max(target, newLimit.remaining), newLimit.maximum)
@@ -700,8 +700,8 @@ private struct UsageHistoryView: View {
                 .tracking(0.6)
                 .padding(.horizontal, 17)
                 .padding(.vertical, 11)
-                .background(Color.synPink)
-                .stickerBorder(shadow: .synInkShadow, cornerRadius: 10, offset: 5)
+                .background(Color.alloPink)
+                .stickerBorder(shadow: .alloInkShadow, cornerRadius: 10, offset: 5)
                 .rotationEffect(.degrees(-1.7))
                 .accessibilityLabel("Your week so far")
                 .accessibilityAddTraits(.isHeader)
@@ -711,13 +711,13 @@ private struct UsageHistoryView: View {
                     Text("RECENT CHECK-INS")
                         .font(.caption.bold())
                         .tracking(0.8)
-                        .foregroundStyle(Color.synMuted)
+                        .foregroundStyle(Color.alloMuted)
                     Text("History")
                         .font(.system(.largeTitle, design: .rounded, weight: .black))
                         .accessibilityAddTraits(.isHeader)
                     Text("Saved quota snapshots, oldest to newest.")
                         .font(.subheadline)
-                        .foregroundStyle(Color.synMuted)
+                        .foregroundStyle(Color.alloMuted)
                 }
                 Spacer()
                 rangePicker
@@ -734,7 +734,7 @@ private struct UsageHistoryView: View {
 
             Text("History starts with your first check-in and stays on this device.")
                 .font(.footnote)
-                .foregroundStyle(Color.synMuted)
+                .foregroundStyle(Color.alloMuted)
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: .infinity)
         }
@@ -746,7 +746,7 @@ private struct UsageHistoryView: View {
             rangeButton(30)
         }
         .padding(3)
-        .background(Color.synPaper)
+        .background(Color.alloPaper)
         .notebookOutline(cornerRadius: 11)
     }
 
@@ -755,7 +755,7 @@ private struct UsageHistoryView: View {
             Text("WEEKLY CREDITS AVAILABLE")
                 .font(.caption.bold())
                 .tracking(0.6)
-                .foregroundStyle(Color.synMuted)
+                .foregroundStyle(Color.alloMuted)
 
             Chart(visibleHistory) { item in
                 BarMark(
@@ -768,13 +768,13 @@ private struct UsageHistoryView: View {
                 .annotation(position: .top) {
                     Text(item.weeklyRemaining, format: .currency(code: "USD").precision(.fractionLength(0)))
                         .font(.caption2.bold())
-                        .foregroundStyle(Color.synInk)
+                        .foregroundStyle(Color.alloInk)
                 }
             }
             .chartYAxis {
                 AxisMarks(position: .leading) { value in
                     AxisGridLine(stroke: StrokeStyle(lineWidth: 1, dash: [3, 4]))
-                        .foregroundStyle(Color.synOutline.opacity(0.24))
+                        .foregroundStyle(Color.alloOutline.opacity(0.24))
                     AxisValueLabel()
                 }
             }
@@ -786,7 +786,7 @@ private struct UsageHistoryView: View {
             .frame(height: 206)
         }
         .padding(19)
-        .background(Color.synPaper)
+        .background(Color.alloPaper)
         .stickerBorder(cornerRadius: 22, offset: 7)
         .rotationEffect(.degrees(-0.5))
     }
@@ -796,13 +796,13 @@ private struct UsageHistoryView: View {
             SummaryCard(
                 label: "MOST IN RESERVE",
                 value: dayName(visibleHistory.max { $0.weeklyRemaining < $1.weeklyRemaining }?.date),
-                color: .synMint,
+                color: .alloMint,
                 rotation: -1.5
             )
             SummaryCard(
                 label: "LEAST IN RESERVE",
                 value: dayName(visibleHistory.min { $0.weeklyRemaining < $1.weeklyRemaining }?.date),
-                color: .synPink,
+                color: .alloPink,
                 rotation: 1.4
             )
         }
@@ -811,10 +811,10 @@ private struct UsageHistoryView: View {
     private func rangeButton(_ value: Int) -> some View {
         Button(value == 7 ? "7D" : "30D") { days = value }
             .font(.caption.bold())
-            .foregroundStyle(Color.synInk)
+            .foregroundStyle(Color.alloInk)
             .padding(.horizontal, 9)
             .frame(minHeight: 44)
-            .background(days == value ? Color.synYellow : .clear)
+            .background(days == value ? Color.alloYellow : .clear)
             .clipShape(RoundedRectangle(cornerRadius: 7))
             .accessibilityAddTraits(days == value ? .isSelected : [])
     }
@@ -851,7 +851,7 @@ private struct LedgerRow: View {
             VStack(alignment: .leading, spacing: 3) {
                 Text(label)
                     .font(.caption2.bold())
-                    .foregroundStyle(Color.synMuted)
+                    .foregroundStyle(Color.alloMuted)
                 Text(value)
                     .font(.system(.subheadline, design: .rounded, weight: .bold))
             }
@@ -868,7 +868,7 @@ private struct LedgerRow: View {
 private struct Stamp: View {
     let icon: String
     let color: Color
-    var foreground = Color.synInk
+    var foreground = Color.alloInk
     var size: CGFloat = 39
 
     var body: some View {
@@ -878,7 +878,7 @@ private struct Stamp: View {
             .frame(width: size, height: size)
             .background(color)
             .clipShape(Circle())
-            .overlay(Circle().strokeBorder(Color.synOutline, lineWidth: 2))
+            .overlay(Circle().strokeBorder(Color.alloOutline, lineWidth: 2))
             .accessibilityHidden(true)
     }
 }
@@ -891,15 +891,15 @@ private struct RefillFact: View {
         VStack(alignment: .leading, spacing: 4) {
             Text(label)
                 .font(.caption2.bold())
-                .foregroundStyle(Color.synPlannerInk.opacity(0.85))
+                .foregroundStyle(Color.alloPlannerInk.opacity(0.85))
             Text(value)
                 .font(.system(.caption, design: .rounded, weight: .bold))
                 .fixedSize(horizontal: false, vertical: true)
         }
         .frame(maxWidth: .infinity, minHeight: 50, alignment: .leading)
         .padding(11)
-        .background(Color.synPaper.opacity(0.66))
-        .overlay(RoundedRectangle(cornerRadius: 11).strokeBorder(Color.synPlannerInk.opacity(0.85), lineWidth: 1.5))
+        .background(Color.alloPaper.opacity(0.66))
+        .overlay(RoundedRectangle(cornerRadius: 11).strokeBorder(Color.alloPlannerInk.opacity(0.85), lineWidth: 1.5))
         .clipShape(RoundedRectangle(cornerRadius: 11))
     }
 }
@@ -915,10 +915,10 @@ private struct SummaryCard: View {
             Text(label)
                 .font(.caption2.bold())
                 .tracking(0.4)
-                .foregroundStyle(Color.synInk.opacity(0.8))
+                .foregroundStyle(Color.alloInk.opacity(0.8))
             Text(value)
                 .font(.system(.headline, design: .rounded, weight: .black))
-                .foregroundStyle(Color.synInk)
+                .foregroundStyle(Color.alloInk)
         }
         .frame(maxWidth: .infinity, minHeight: 73, alignment: .leading)
         .padding(15)
@@ -929,7 +929,7 @@ private struct SummaryCard: View {
 }
 
 private struct DashedDivider: View {
-    var color = Color.synMuted.opacity(0.4)
+    var color = Color.alloMuted.opacity(0.4)
 
     var body: some View {
         Line()
@@ -965,7 +965,7 @@ private struct EmptyUsageView: View {
         }
         .padding(28)
         .frame(maxWidth: .infinity)
-        .background(isError ? Color.synError.opacity(0.15) : Color.synYellow)
+        .background(isError ? Color.alloError.opacity(0.15) : Color.alloYellow)
         .stickerBorder(cornerRadius: 18)
     }
 }
@@ -980,11 +980,11 @@ private struct EmptyHistoryView: View {
                 .font(.system(.headline, design: .rounded, weight: .bold))
             Text("Your first successful check-in will start the chart.")
                 .font(.subheadline)
-                .foregroundStyle(Color.synMuted)
+                .foregroundStyle(Color.alloMuted)
         }
         .frame(maxWidth: .infinity)
         .padding(28)
-        .background(Color.synPaper)
+        .background(Color.alloPaper)
         .stickerBorder(cornerRadius: 20)
     }
 }

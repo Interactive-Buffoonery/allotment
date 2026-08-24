@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct SynViewApp: App {
+struct AllotmentApp: App {
     @State private var store = UsageStore()
     @AppStorage(AppAppearance.storageKey) private var appearance = AppAppearance.system.rawValue
 

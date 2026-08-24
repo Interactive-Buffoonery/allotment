@@ -1,5 +1,5 @@
 import XCTest
-@testable import SynView
+@testable import Allotment
 
 final class QuotaSnapshotTests: XCTestCase {
     func testDecodesCurrentQuotaPayload() throws {

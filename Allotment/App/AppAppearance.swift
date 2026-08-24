@@ -5,7 +5,7 @@ enum AppAppearance: String, CaseIterable {
     case light
     case dark
 
-    static let storageKey = "synview-appearance"
+    static let storageKey = "allotment-appearance"
 
     var colorScheme: ColorScheme? {
         switch self {

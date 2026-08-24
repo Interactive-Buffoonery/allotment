@@ -2,7 +2,7 @@ import Foundation
 import Security
 
 struct APIKeyStore: Sendable {
-    private let service = "com.interactivebuffoonery.synview"
+    private let service = "com.interactivebuffoonery.allotment"
     private let account = "synthetic-api-key"
 
     func load() -> String? {
@@ -56,5 +56,5 @@ struct APIKeyStore: Sendable {
 enum KeyStoreError: LocalizedError {
     case writeFailed
 
-    var errorDescription: String? { "SynView couldn’t securely save the API key." }
+    var errorDescription: String? { "Allotment couldn’t securely save the API key." }
 }

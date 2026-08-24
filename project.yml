@@ -1,4 +1,4 @@
-name: SynView
+name: Allotment
 options:
   bundleIdPrefix: com.serabi
   deploymentTarget:
@@ -12,14 +12,14 @@ settings:
     CURRENT_PROJECT_VERSION: 5
     MARKETING_VERSION: 0.2.0
 targets:
-  SynView:
+  Allotment:
     type: application
     platform: iOS
-    sources: SynView
+    sources: Allotment
     info:
-      path: SynView/Info.plist
+      path: Allotment/Info.plist
       properties:
-        CFBundleDisplayName: SynView
+        CFBundleDisplayName: Allotment
         ITSAppUsesNonExemptEncryption: false
         UIApplicationSceneManifest:
           UIApplicationSupportsMultipleScenes: false
@@ -35,20 +35,20 @@ targets:
           - UIInterfaceOrientationLandscapeRight
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.interactivebuffoonery.synview
-        PRODUCT_NAME: SynView
+        PRODUCT_BUNDLE_IDENTIFIER: com.interactivebuffoonery.allotment
+        PRODUCT_NAME: Allotment
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         TARGETED_DEVICE_FAMILY: "1,2"
     scheme:
       testTargets:
-        - SynViewTests
-  SynViewTests:
+        - AllotmentTests
+  AllotmentTests:
     type: bundle.unit-test
     platform: iOS
-    sources: SynViewTests
+    sources: AllotmentTests
     dependencies:
-      - target: SynView
+      - target: Allotment
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.interactivebuffoonery.synview.tests
+        PRODUCT_BUNDLE_IDENTIFIER: com.interactivebuffoonery.allotment.tests

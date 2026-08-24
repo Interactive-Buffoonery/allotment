@@ -18,13 +18,13 @@ struct SettingsView: View {
                 Text("MAKE IT YOURS")
                     .font(.caption.bold())
                     .tracking(0.8)
-                    .foregroundStyle(Color.synMuted)
+                    .foregroundStyle(Color.alloMuted)
                 Text("Settings")
                     .font(.system(.largeTitle, design: .rounded, weight: .black))
                     .accessibilityAddTraits(.isHeader)
                 Text("Keep the useful bits. Pick the fun bits.")
                     .font(.subheadline)
-                    .foregroundStyle(Color.synMuted)
+                    .foregroundStyle(Color.alloMuted)
             }
 
             layoutCard
@@ -42,24 +42,24 @@ struct SettingsView: View {
                 .tracking(0.6)
                 .padding(.horizontal, 17)
                 .padding(.vertical, 11)
-                .background(Color.synPink)
+                .background(Color.alloPink)
                 .stickerBorder(cornerRadius: 10, offset: 5)
                 .rotationEffect(.degrees(-1.4))
                 .accessibilityLabel("Pick your view")
                 .accessibilityAddTraits(.isHeader)
 
-            layoutButton(.bars, color: .synYellow, rotation: -1.2)
+            layoutButton(.bars, color: .alloYellow, rotation: -1.2)
 
             Text("OR")
                 .font(.system(.caption, design: .rounded, weight: .black))
                 .padding(.horizontal, 13)
                 .padding(.vertical, 7)
-                .background(Color.synPaper)
+                .background(Color.alloPaper)
                 .notebookOutline(cornerRadius: 18)
                 .frame(maxWidth: .infinity)
                 .rotationEffect(.degrees(2))
 
-            layoutButton(.rings, color: .synBlue, rotation: 1.1)
+            layoutButton(.rings, color: .alloBlue, rotation: 1.1)
         }
     }
 
@@ -83,14 +83,14 @@ struct SettingsView: View {
                 if isSelected(option) {
                     Image(systemName: "checkmark")
                         .font(.headline.bold())
-                        .foregroundStyle(Color.synPaper)
+                        .foregroundStyle(Color.alloPaper)
                         .frame(width: 38, height: 38)
-                        .background(Color.synInk)
+                        .background(Color.alloInk)
                         .clipShape(Circle())
                         .accessibilityHidden(true)
                 }
             }
-            .foregroundStyle(option == .bars ? Color.synPlannerInk : Color.synInk)
+            .foregroundStyle(option == .bars ? Color.alloPlannerInk : Color.alloInk)
             .padding(.horizontal, 18)
             .padding(.vertical, 20)
             .background(color)
@@ -125,10 +125,10 @@ struct SettingsView: View {
                 .fill(Color.white.opacity(0.48))
                 .frame(width: 70, height: 12)
             RoundedRectangle(cornerRadius: 4)
-                .fill(Color.synPurple)
+                .fill(Color.alloPurple)
                 .frame(width: width, height: 12)
         }
-        .overlay(RoundedRectangle(cornerRadius: 4).stroke(Color.synOutline, lineWidth: 2))
+        .overlay(RoundedRectangle(cornerRadius: 4).stroke(Color.alloOutline, lineWidth: 2))
     }
 
     private func miniRing(progress: Double) -> some View {
@@ -136,7 +136,7 @@ struct SettingsView: View {
             Circle().stroke(Color.white.opacity(0.48), lineWidth: 7)
             Circle()
                 .trim(from: 0, to: progress)
-                .stroke(Color.synPurple, style: StrokeStyle(lineWidth: 7, lineCap: .round))
+                .stroke(Color.alloPurple, style: StrokeStyle(lineWidth: 7, lineCap: .round))
                 .rotationEffect(.degrees(-90))
         }
         .frame(width: 31, height: 31)
@@ -147,9 +147,9 @@ struct SettingsView: View {
             VStack(alignment: .leading, spacing: 3) {
                 Text("Appearance")
                     .font(.system(.title2, design: .rounded, weight: .bold))
-                Text("Pick SynView’s look on this device.")
+                Text("Pick Allotment’s look on this device.")
                     .font(.subheadline)
-                    .foregroundStyle(Color.synMuted)
+                    .foregroundStyle(Color.alloMuted)
             }
 
             HStack(spacing: 4) {
@@ -163,21 +163,21 @@ struct SettingsView: View {
                             Text(option.label)
                                 .font(.system(.caption, design: .rounded, weight: .bold))
                         }
-                        .foregroundStyle(Color.synInk)
+                        .foregroundStyle(Color.alloInk)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
-                        .background(isSelected(option) ? Color.synPink : .clear)
+                        .background(isSelected(option) ? Color.alloPink : .clear)
                         .clipShape(RoundedRectangle(cornerRadius: 10))
                     }
                     .accessibilityAddTraits(isSelected(option) ? .isSelected : [])
                 }
             }
             .padding(4)
-            .background(Color.synInk.opacity(0.06))
+            .background(Color.alloInk.opacity(0.06))
             .clipShape(RoundedRectangle(cornerRadius: 14))
         }
         .padding(19)
-        .background(Color.synPaper)
+        .background(Color.alloPaper)
         .stickerBorder(cornerRadius: 22)
     }
 
@@ -188,7 +188,7 @@ struct SettingsView: View {
                     .font(.system(.title2, design: .rounded, weight: .bold))
                 Text(store.hasAPIKey ? "A key is saved on this device." : "No key saved yet — add one to connect.")
                     .font(.subheadline)
-                    .foregroundStyle(Color.synMuted)
+                    .foregroundStyle(Color.alloMuted)
             }
 
             SecureField("syn_…", text: $apiKey)
@@ -198,13 +198,13 @@ struct SettingsView: View {
                 .textContentType(.password)
                 .focused($isKeyFocused)
                 .padding(16)
-                .background(Color.synInk.opacity(0.06))
+                .background(Color.alloInk.opacity(0.06))
                 .notebookOutline(cornerRadius: 14)
 
             if let keyMessage {
                 Text(keyMessage)
                     .font(.footnote)
-                    .foregroundStyle(keyMessageIsError ? Color.synError : Color.synMuted)
+                    .foregroundStyle(keyMessageIsError ? Color.alloError : Color.alloMuted)
                     .accessibilityFocused($isKeyMessageFocused)
             }
 
@@ -217,8 +217,8 @@ struct SettingsView: View {
                     .padding(.vertical, 15)
             }
             .buttonStyle(.plain)
-            .foregroundStyle(Color.synPlannerInk)
-            .background(Color.synYellow)
+            .foregroundStyle(Color.alloPlannerInk)
+            .background(Color.alloYellow)
             .stickerBorder()
             .disabled(apiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
 
@@ -232,10 +232,10 @@ struct SettingsView: View {
 
             Text("Your key stays in this device's Keychain.")
                 .font(.footnote)
-                .foregroundStyle(Color.synMuted)
+                .foregroundStyle(Color.alloMuted)
         }
         .padding(19)
-        .background(Color.synPaper)
+        .background(Color.alloPaper)
         .stickerBorder(cornerRadius: 22)
         .confirmationDialog(
             "Disconnect Synthetic?",
