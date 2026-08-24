@@ -100,3 +100,45 @@ ctx.restoreGState()
 drawSprout(ctx, silhouette: false, scale: iconScale)
 savePNG(ctx.makeImage()!, to: "Allotment/Assets.xcassets/AppIcon.appiconset/AppIcon.png")
 print("wrote AppIcon.png")
+
+// --- Launch lockup: mini sprout + "Allotment" in Fraunces, transparent bg ---
+let fontURL = URL(fileURLWithPath: "Allotment/Fonts/Fraunces-SemiBold.ttf") as CFURL
+var fontError: Unmanaged<CFError>?
+precondition(CTFontManagerRegisterFontsForURL(fontURL, .process, &fontError), "register Fraunces")
+
+func renderLockup(scale: CGFloat) -> CGImage {
+    let width = Int(360 * scale)
+    let height = Int(110 * scale)
+    let space = CGColorSpaceCreateDeviceRGB()
+    let ctx = CGContext(data: nil, width: width, height: height,
+                        bitsPerComponent: 8, bytesPerRow: 0, space: space,
+                        bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!
+    ctx.translateBy(x: 0, y: CGFloat(height))
+    ctx.scaleBy(x: 1, y: -1)
+
+    // Mini sprout on the left: design content spans roughly x 100-912, y 200-714.
+    ctx.saveGState()
+    ctx.translateBy(x: -13 * scale, y: -25 * scale)
+    drawSprout(ctx, silhouette: false, scale: 0.15 * scale)
+    ctx.restoreGState()
+
+    let font = CTFontCreateWithName("Fraunces-SemiBold" as CFString, 52 * scale, nil)
+    let attrs: [NSAttributedString.Key: Any] = [
+        NSAttributedString.Key(kCTFontAttributeName as String): font,
+        NSAttributedString.Key(kCTForegroundColorAttributeName as String): ink,
+    ]
+    let line = CTLineCreateWithAttributedString(NSAttributedString(string: "Allotment", attributes: attrs))
+    // CoreText is bottom-up; the flip above put us back in top-down space.
+    ctx.saveGState()
+    ctx.translateBy(x: 116 * scale, y: 71 * scale)
+    ctx.scaleBy(x: 1, y: -1)
+    ctx.textPosition = .zero
+    CTLineDraw(line, ctx)
+    ctx.restoreGState()
+    return ctx.makeImage()!
+}
+
+for (scale, name) in [(1.0, "LaunchLockup"), (2.0, "LaunchLockup@2x"), (3.0, "LaunchLockup@3x")] {
+    savePNG(renderLockup(scale: scale), to: "Allotment/Assets.xcassets/LaunchLockup.imageset/\(name).png")
+}
+print("wrote LaunchLockup PNGs")
