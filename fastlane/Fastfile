@@ -13,6 +13,22 @@ platform :ios do
       export_method: "app-store",
       export_xcargs: "-allowProvisioningUpdates -authenticationKeyPath #{File.expand_path("~/.appstoreconnect/private_keys/AuthKey_4LV25PP896.p8")} -authenticationKeyID 4LV25PP896 -authenticationKeyIssuerID 76aeceb6-cdd5-4b5f-94e1-692c0dc9cb8f"
     )
-    upload_to_testflight(api_key: api_key)
+    upload_to_testflight(api_key: api_key, groups: ["Initial Testing"])
+  end
+
+  desc "Attach an already-uploaded build to the internal group"
+  lane :distribute do |options|
+    app_store_connect_api_key(
+      key_id: "4LV25PP896",
+      issuer_id: "76aeceb6-cdd5-4b5f-94e1-692c0dc9cb8f",
+      key_filepath: File.expand_path("~/.appstoreconnect/private_keys/AuthKey_4LV25PP896.p8")
+    )
+    upload_to_testflight(
+      distribute_only: true,
+      app_version: options[:version],
+      build_number: options[:build],
+      groups: ["Initial Testing"],
+      notify_external_testers: false
+    )
   end
 end
