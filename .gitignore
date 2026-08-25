@@ -6,3 +6,8 @@ xcuserdata/
 .DS_Store
 *.xccheckout
 *.xcscmblueprint
+*.ipa
+*.dSYM.zip
+fastlane/report.xml
+fastlane/README.md
+fastlane/.env*
