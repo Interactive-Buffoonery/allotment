@@ -1,0 +1,6 @@
+app_identifier("com.interactivebuffoonery.allotment")
+team_id("7CNK4YPCQX")
+
+# ponytail: no apple_id here, fastlane prompts once and uses the
+# login keychain entry after that. Add apple_id("you@example.com") if
+# the prompt gets annoying.
