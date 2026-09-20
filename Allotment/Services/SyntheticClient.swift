@@ -29,6 +29,13 @@ enum SyntheticError: LocalizedError, Equatable {
     case invalidResponse
     case httpStatus(Int)
 
+    var isAuthFailure: Bool {
+        switch self {
+        case .httpStatus(401), .httpStatus(403): true
+        default: false
+        }
+    }
+
     var errorDescription: String? {
         switch self {
         case .invalidResponse:

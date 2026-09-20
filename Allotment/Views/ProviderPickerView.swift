@@ -4,12 +4,15 @@ struct ProviderPickerView: View {
     let store: UsageStore
     var showsHero: Bool
 
+    @State private var comingSoonName: String?
+
     var body: some View {
         VStack(spacing: 24) {
             if showsHero {
                 Spacer(minLength: 8)
                 Text("ALLOTMENT ✿")
                     .font(.alloWordmark(size: 24))
+                    .foregroundStyle(Color.alloStickerInk)
                     .padding(.horizontal, 18)
                     .padding(.vertical, 12)
                     .background(Color.alloPink)
@@ -32,28 +35,53 @@ struct ProviderPickerView: View {
             VStack(spacing: 14) {
                 ForEach(Provider.allCases, id: \.self) { provider in
                     NavigationLink(value: provider) {
-                        providerRow(icon: provider.icon, name: provider.displayName, status: nil)
+                        providerRow(
+                            icon: provider.icon,
+                            name: provider.displayName,
+                            badge: store.hasAPIKey ? "CONNECTED" : nil
+                        )
                     }
                     .buttonStyle(.plain)
+                    .accessibilityHint(store.hasAPIKey ? "Opens key update" : "Connect this provider")
                 }
-                providerRow(icon: "chevron.left.forwardslash.chevron.right", name: "Codex", status: "COMING SOON")
-                providerRow(icon: "ellipsis", name: "More providers", status: "COMING SOON")
+                comingSoonRow(icon: "chevron.left.forwardslash.chevron.right", name: "Codex")
+                comingSoonRow(icon: "ellipsis", name: "More providers")
             }
             Spacer(minLength: 20)
         }
         .padding(24)
         .frame(maxWidth: 700)
         .frame(maxWidth: .infinity)
+        .alert("Coming soon", isPresented: Binding(
+            get: { comingSoonName != nil },
+            set: { if !$0 { comingSoonName = nil } }
+        )) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("\(comingSoonName ?? "") isn’t available yet.")
+        }
     }
 
-    private func providerRow(icon: String, name: String, status: String?) -> some View {
+    private func comingSoonRow(icon: String, name: String) -> some View {
+        Button {
+            comingSoonName = name
+        } label: {
+            providerRow(icon: icon, name: name, badge: "COMING SOON", muted: true)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(name)
+        .accessibilityValue("Coming soon")
+        .accessibilityHint("Not available yet")
+    }
+
+    private func providerRow(icon: String, name: String, badge: String?, muted: Bool = false) -> some View {
         HStack(spacing: 15) {
             Stamp(icon: icon, color: .alloMint, size: 46)
             Text(name)
                 .font(.system(.title3, design: .rounded, weight: .bold))
             Spacer()
-            if let status {
-                ComingSoonChip()
+            if let badge {
+                ComingSoonChip(badge)
             } else {
                 Image(systemName: "chevron.right")
                     .font(.headline)
@@ -61,7 +89,7 @@ struct ProviderPickerView: View {
                     .accessibilityHidden(true)
             }
         }
-        .opacity(status == nil ? 1 : 0.55)
+        .foregroundStyle(muted ? Color.alloMuted : Color.alloInk)
         .padding(.horizontal, 18)
         .padding(.vertical, 16)
         .background(Color.alloPaper)

@@ -5,6 +5,7 @@ struct SettingsView: View {
 
     @AppStorage(AppAppearance.storageKey) private var appearance = AppAppearance.system.rawValue
     @State private var showDisconnectConfirmation = false
+    @State private var showICloudComingSoon = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 22) {
@@ -26,7 +27,7 @@ struct SettingsView: View {
             iCloudSection
         }
         .frame(maxWidth: 700)
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, alignment: .center)
     }
 
     private var providersSection: some View {
@@ -78,7 +79,7 @@ struct SettingsView: View {
                         .font(.headline)
                         .frame(width: 39, height: 39)
                         .overlay(Circle().strokeBorder(Color.alloMuted, style: StrokeStyle(lineWidth: 2, dash: [5, 4])))
-                    Text("Add provider")
+                    Text(store.hasAPIKey ? "Add another provider" : "Add provider")
                         .font(.system(.title3, design: .rounded, weight: .bold))
                     Spacer()
                 }
@@ -88,6 +89,7 @@ struct SettingsView: View {
                 .overlay(RoundedRectangle(cornerRadius: 18).strokeBorder(Color.alloMuted.opacity(0.6), style: StrokeStyle(lineWidth: 1.5, dash: [6, 5])))
             }
             .buttonStyle(.plain)
+            .accessibilityHint(store.hasAPIKey ? "Codex and other providers are coming soon. Synthetic is already connected." : "Choose a provider")
 
             if store.hasAPIKey {
                 Button("Disconnect Synthetic", role: .destructive) {
@@ -95,6 +97,12 @@ struct SettingsView: View {
                 }
                 .font(.subheadline.bold())
                 .frame(maxWidth: .infinity, minHeight: 44)
+            }
+
+            if let errorMessage = store.errorMessage {
+                Text(errorMessage)
+                    .font(.footnote)
+                    .foregroundStyle(Color.alloError)
             }
         }
         .padding(19)
@@ -159,7 +167,7 @@ struct SettingsView: View {
                             Text(option.label)
                                 .font(.system(.caption, design: .rounded, weight: .bold))
                         }
-                        .foregroundStyle(Color.alloInk)
+                        .foregroundStyle(isSelected(option) ? Color.alloStickerInk : Color.alloInk)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
                         .background(isSelected(option) ? Color.alloPink : .clear)
@@ -178,22 +186,34 @@ struct SettingsView: View {
     }
 
     private var iCloudSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 10) {
-                Text("iCloud Sync")
-                    .font(.system(.title2, design: .rounded, weight: .bold))
-                ComingSoonChip()
+        Button {
+            showICloudComingSoon = true
+        } label: {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(spacing: 10) {
+                    Text("iCloud Sync")
+                        .font(.system(.title2, design: .rounded, weight: .bold))
+                    ComingSoonChip()
+                }
+                Text("Sync providers, keys, and history across your devices.")
+                    .font(.subheadline)
+                    .foregroundStyle(Color.alloMuted)
             }
-            Text("Sync providers, keys, and history across your devices.")
-                .font(.subheadline)
-                .foregroundStyle(Color.alloMuted)
+            .foregroundStyle(Color.alloInk)
+            .padding(19)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color.alloPaper)
+            .stickerBorder(cornerRadius: 22)
         }
-        .opacity(0.55)
-        .padding(19)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.alloPaper)
-        .stickerBorder(cornerRadius: 22)
+        .buttonStyle(.plain)
         .accessibilityElement(children: .combine)
+        .accessibilityLabel("iCloud Sync, coming soon")
+        .accessibilityHint("Not available yet")
+        .alert("Coming soon", isPresented: $showICloudComingSoon) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("iCloud Sync isn’t available yet.")
+        }
     }
 
     private func isSelected(_ option: AppAppearance) -> Bool {

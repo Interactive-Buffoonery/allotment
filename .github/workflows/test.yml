@@ -1,0 +1,34 @@
+name: Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Generate project
+        run: xcodegen generate
+      - name: Test
+        run: |
+          set -euo pipefail
+          destination=""
+          for name in "iPhone 17" "iPhone 16" "iPhone 15"; do
+            if xcrun simctl list devices available | grep -q "$name"; then
+              destination="platform=iOS Simulator,name=$name"
+              break
+            fi
+          done
+          if [ -z "$destination" ]; then
+            echo "No iPhone simulator available"
+            xcrun simctl list devices available
+            exit 1
+          fi
+          xcodebuild test \
+            -scheme Allotment \
+            -destination "$destination"

@@ -31,11 +31,24 @@ struct WeeklyTokenLimit: Decodable, Sendable, Equatable {
 
     init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
-        self.nextRefillDate = try c.decode(String.self, forKey: .nextRegenAt).iso8601Date
+        let regenAt = try c.decode(String.self, forKey: .nextRegenAt)
+        guard let nextRefillDate = regenAt.iso8601Date else {
+            throw DecodingError.dataCorruptedError(forKey: .nextRegenAt, in: c, debugDescription: "Invalid ISO-8601 date.")
+        }
+        guard let maximum = try c.decode(String.self, forKey: .maxCredits).parsedCurrencyAmount else {
+            throw DecodingError.dataCorruptedError(forKey: .maxCredits, in: c, debugDescription: "Invalid currency value.")
+        }
+        guard let remaining = try c.decode(String.self, forKey: .remainingCredits).parsedCurrencyAmount else {
+            throw DecodingError.dataCorruptedError(forKey: .remainingCredits, in: c, debugDescription: "Invalid currency value.")
+        }
+        guard let refillAmount = try c.decode(String.self, forKey: .nextRegenCredits).parsedCurrencyAmount else {
+            throw DecodingError.dataCorruptedError(forKey: .nextRegenCredits, in: c, debugDescription: "Invalid currency value.")
+        }
+        self.nextRefillDate = nextRefillDate
         self.percentRemaining = try c.decode(Double.self, forKey: .percentRemaining)
-        self.maximum = try c.decode(String.self, forKey: .maxCredits).currencyValue
-        self.remaining = try c.decode(String.self, forKey: .remainingCredits).currencyValue
-        self.refillAmount = try c.decode(String.self, forKey: .nextRegenCredits).currencyValue
+        self.maximum = maximum
+        self.remaining = remaining
+        self.refillAmount = refillAmount
     }
 
     enum CodingKeys: String, CodingKey {
@@ -43,10 +56,13 @@ struct WeeklyTokenLimit: Decodable, Sendable, Equatable {
     }
 
     func timeToReach(_ target: Double, now: Date = .now) -> TimeInterval {
-        guard target > remaining, refillAmount > 0 else { return 0 }
-        let ticks = ceil((min(target, maximum) - remaining) / refillAmount)
+        let remainingCents = Int((remaining * 100).rounded())
+        let targetCents = Int((min(target, maximum) * 100).rounded())
+        let refillCents = Int((refillAmount * 100).rounded())
+        guard targetCents > remainingCents, refillCents > 0 else { return 0 }
+        let ticks = (targetCents - remainingCents + refillCents - 1) / refillCents
         let firstTick = max(0, nextRefillDate?.timeIntervalSince(now) ?? 0)
-        return firstTick + max(0, ticks - 1) * Self.regenerationInterval
+        return firstTick + max(0, Double(ticks - 1)) * Self.regenerationInterval
     }
 }
 
@@ -71,7 +87,11 @@ struct RollingFiveHourLimit: Decodable, Sendable, Equatable {
 
     init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
-        self.nextTickDate = try c.decode(String.self, forKey: .nextTickAt).iso8601Date
+        let tickAt = try c.decode(String.self, forKey: .nextTickAt)
+        guard let nextTickDate = tickAt.iso8601Date else {
+            throw DecodingError.dataCorruptedError(forKey: .nextTickAt, in: c, debugDescription: "Invalid ISO-8601 date.")
+        }
+        self.nextTickDate = nextTickDate
         self.tickPercent = try c.decode(Double.self, forKey: .tickPercent)
         self.remaining = try c.decode(Double.self, forKey: .remaining)
         self.max = try c.decode(Double.self, forKey: .max)
@@ -92,10 +112,22 @@ struct DailySnapshot: Codable, Identifiable, Sendable {
     let rollingMaximum: Double
 }
 
+extension Array where Element == DailySnapshot {
+    func occurring(inLastDays days: Int, now: Date = .now, calendar: Calendar = .current) -> [DailySnapshot] {
+        let start = calendar.date(byAdding: .day, value: 1 - days, to: calendar.startOfDay(for: now)) ?? .distantPast
+        return filter { $0.date >= start }
+    }
+}
+
 extension String {
     var currencyValue: Double {
+        parsedCurrencyAmount ?? 0
+    }
+
+    var parsedCurrencyAmount: Double? {
         let stripped = filter { $0.isASCII && ($0.isNumber || $0 == "." || $0 == "-") }
-        return Double(stripped) ?? 0
+        guard stripped.contains(where: \.isNumber) else { return nil }
+        return Double(stripped)
     }
 
     var iso8601Date: Date? {
