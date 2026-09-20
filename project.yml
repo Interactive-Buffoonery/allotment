@@ -20,6 +20,8 @@ targets:
       path: Allotment/Info.plist
       properties:
         CFBundleDisplayName: Allotment
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         UIAppFonts:
           - Fraunces-SemiBold.ttf
         ITSAppUsesNonExemptEncryption: false

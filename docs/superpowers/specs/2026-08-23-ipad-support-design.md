@@ -1,7 +1,11 @@
 # Native iPad Support (Adaptive Layout)
 
 **Date:** 2026-08-23
-**Status:** Approved
+**Status:** Approved — **partially superseded**
+
+> **Superseded layout pairing:** this spec was written for SynView’s rings dashboard (`QuotaRingsCard` beside access cards). Rings were removed in the 2026-08-24 rebrand. The live regular-width pair is `QuotaBarsCard` + `WeeklyPlannerCard`. Device family, orientations, compact stacking, and the ~700pt centered Settings/Setup cap still apply.
+
+## Goal
 
 ## Goal
 

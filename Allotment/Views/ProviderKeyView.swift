@@ -12,6 +12,10 @@ struct ProviderKeyView: View {
     @AccessibilityFocusState private var isMessageFocused: Bool
     @Environment(\.dismiss) private var dismiss
 
+    private var canSave: Bool {
+        !apiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !store.isLoading
+    }
+
     var body: some View {
         VStack(spacing: 24) {
             Spacer(minLength: onboarding ? 8 : 0)
@@ -34,6 +38,7 @@ struct ProviderKeyView: View {
                     .autocorrectionDisabled()
                     .textContentType(.password)
                     .focused($isKeyFocused)
+                    .disabled(store.isLoading)
                     .padding(16)
                     .background(Color.alloPaper)
                     .notebookOutline(cornerRadius: 14)
@@ -48,16 +53,23 @@ struct ProviderKeyView: View {
             Button {
                 saveKey()
             } label: {
-                Text(onboarding ? "Save provider" : "Update Key")
-                    .font(.headline)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 15)
+                HStack(spacing: 10) {
+                    if store.isLoading {
+                        ProgressView()
+                            .tint(Color.alloStickerInk)
+                    }
+                    Text(buttonTitle)
+                        .font(.headline)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 15)
             }
             .buttonStyle(.plain)
             .foregroundStyle(Color.alloStickerInk)
             .background(Color.alloMauve)
             .stickerBorder()
-            .disabled(apiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            .disabled(!canSave)
+            .accessibilityLabel(buttonTitle)
 
             Text("Your key stays in this device's Keychain.")
                 .font(.footnote)
@@ -79,28 +91,39 @@ struct ProviderKeyView: View {
                         .foregroundStyle(Color.alloRequestFill)
                 }
                 .accessibilityLabel("Back to providers")
+                .disabled(store.isLoading)
             }
         }
         .task { if onboarding { isKeyFocused = true } }
     }
 
+    private var buttonTitle: String {
+        if store.isLoading { return "Checking Synthetic…" }
+        return onboarding ? "Save provider" : "Update Key"
+    }
+
     private func saveKey() {
-        do {
-            try store.saveAPIKey(apiKey)
-            apiKey = ""
-            if onboarding {
-                Task { await store.refresh() }  // RootView swaps to dashboard via hasAPIKey
-            } else {
+        let submitted = apiKey
+        Task {
+            do {
+                try await store.connect(submitted)
+                apiKey = ""
+                announce(onboarding ? "Connected to \(provider.displayName)." : "API key saved.")
+                if onboarding { return }
                 message = "API key saved."
                 messageIsError = false
                 isKeyFocused = false
                 isMessageFocused = true
-                Task { await store.refresh() }
+            } catch {
+                message = error.localizedDescription
+                messageIsError = true
+                isMessageFocused = true
+                announce(error.localizedDescription)
             }
-        } catch {
-            message = error.localizedDescription
-            messageIsError = true
-            isMessageFocused = true
         }
+    }
+
+    private func announce(_ text: String) {
+        AccessibilityNotification.Announcement(text).post()
     }
 }

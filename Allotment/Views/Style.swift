@@ -14,6 +14,7 @@ extension Color {
     static let alloShadow = adaptive(light: .rgb(0.55, 0.47, 0.85), dark: UIColor(red: 0.67, green: 0.59, blue: 0.94, alpha: 0.35))
     static let alloInkShadow = adaptive(light: .rgb(0.18, 0.16, 0.29), dark: UIColor(red: 0.67, green: 0.59, blue: 0.94, alpha: 0.35))
     static let alloStickerInk = Color(uiColor: .rgb(0.18, 0.16, 0.28))
+    static let alloStickerPaper = Color(uiColor: .rgb(1.0, 0.99, 0.97))
     static let alloRequestFill = adaptive(light: .rgb(0.14, 0.51, 0.37), dark: .rgb(0.38, 0.76, 0.62))
     static let alloError = adaptive(light: .rgb(0.72, 0.13, 0.16), dark: .rgb(0.96, 0.51, 0.55))
 
@@ -82,7 +83,7 @@ private struct StickerBorder: ViewModifier {
 
 extension Font {
     static func alloWordmark(size: CGFloat) -> Font {
-        .custom("Fraunces-SemiBold", size: size)
+        .custom("Fraunces-SemiBold", size: size, relativeTo: .largeTitle)
     }
 }
 

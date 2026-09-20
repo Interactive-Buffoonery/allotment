@@ -7,14 +7,14 @@ final class APIKeyStoreTests: XCTestCase {
     private let store = APIKeyStore(provider: .synthetic)
 
     override func tearDown() {
-        store.delete()
+        try? store.delete()
         super.tearDown()
     }
 
     func testSaveLoadDeleteRoundTrips() throws {
         try store.save("test-key-12345")
         XCTAssertEqual(store.load(), "test-key-12345")
-        store.delete()
+        try store.delete()
         XCTAssertNil(store.load())
     }
 }

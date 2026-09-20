@@ -7,15 +7,18 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		25DF7070CF72F16479914BD3 /* TestDoubles.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4250EB928A2823E2C0C1ED3 /* TestDoubles.swift */; };
 		3737935084074F7D5FF2BCAF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E1FD8069E5785ABAE00B9036 /* Assets.xcassets */; };
 		512B8FD08A9352FCC3B99964 /* ProviderKeyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1EBF3817822F9054280DA3C /* ProviderKeyView.swift */; };
 		65DA7B94618B271377BD003E /* SetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F9948C821B3CB301E39890A /* SetupView.swift */; };
+		6A0CC8DA172FFF2BCEEE62F5 /* SyntheticClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 851F72E4EC9EC1B8EA86AFBF /* SyntheticClientTests.swift */; };
 		7031B46ACC9BE0912CE71517 /* QuotaSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB54777B5D2F39C7216BF232 /* QuotaSnapshot.swift */; };
 		71139E921B169336E7471902 /* Fraunces-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = F43F1A1AD15B347770B1EF24 /* Fraunces-SemiBold.ttf */; };
 		76AACE9B4B928BCB06830FC2 /* ProviderPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B29B2740A3BAAC4C65258C4C /* ProviderPickerView.swift */; };
 		773B21359E52C899A603EC97 /* SyntheticClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B5125A67767D50ABDB6CFE7 /* SyntheticClient.swift */; };
 		90AAD478446CFA7DA803E1FF /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1785C04AAB7D904B8DCAD8AC /* RootView.swift */; };
 		923AC05CCAB958FF388889EC /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = CF05F7863F9C62630E5FBCFF /* PrivacyInfo.xcprivacy */; };
+		98753202E55956E6C58C9FF0 /* UsageStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6A1DB7C89896BE3440207E4 /* UsageStoreTests.swift */; };
 		A6D8B3E5B7869039D95B84B7 /* APIKeyStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F40224B19339E05D92309D3D /* APIKeyStore.swift */; };
 		AD8CD4CE895EC8BC7DB2AF7F /* AllotmentApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B4F4CB8DF2DCF43269BDBD2 /* AllotmentApp.swift */; };
 		C036631AC14E53FBC455A089 /* Style.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D02F849B1ED88A42108EFA1 /* Style.swift */; };
@@ -51,15 +54,18 @@
 		5B4F4CB8DF2DCF43269BDBD2 /* AllotmentApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllotmentApp.swift; sourceTree = "<group>"; };
 		66F4BCA5504740843AF0C85D /* QuotaSnapshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotaSnapshotTests.swift; sourceTree = "<group>"; };
 		7B5125A67767D50ABDB6CFE7 /* SyntheticClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyntheticClient.swift; sourceTree = "<group>"; };
+		851F72E4EC9EC1B8EA86AFBF /* SyntheticClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyntheticClientTests.swift; sourceTree = "<group>"; };
 		8ACD669FCDA2752A76A48884 /* AllotmentTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = AllotmentTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		AB54777B5D2F39C7216BF232 /* QuotaSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotaSnapshot.swift; sourceTree = "<group>"; };
 		B1EBF3817822F9054280DA3C /* ProviderKeyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderKeyView.swift; sourceTree = "<group>"; };
 		B29B2740A3BAAC4C65258C4C /* ProviderPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderPickerView.swift; sourceTree = "<group>"; };
 		B44067A095E91239EB69D16B /* APIKeyStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIKeyStoreTests.swift; sourceTree = "<group>"; };
 		B91A49F2882A186784001DBD /* AppAppearance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppAppearance.swift; sourceTree = "<group>"; };
+		C4250EB928A2823E2C0C1ED3 /* TestDoubles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestDoubles.swift; sourceTree = "<group>"; };
 		CBA16B5B6BCDDEE23B525B72 /* UsageStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageStore.swift; sourceTree = "<group>"; };
 		CF05F7863F9C62630E5FBCFF /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		E1FD8069E5785ABAE00B9036 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		E6A1DB7C89896BE3440207E4 /* UsageStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageStoreTests.swift; sourceTree = "<group>"; };
 		E9E590BD85B591D995AEC18D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		F40224B19339E05D92309D3D /* APIKeyStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIKeyStore.swift; sourceTree = "<group>"; };
 		F43F1A1AD15B347770B1EF24 /* Fraunces-SemiBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Fraunces-SemiBold.ttf"; sourceTree = "<group>"; };
@@ -71,6 +77,9 @@
 			children = (
 				B44067A095E91239EB69D16B /* APIKeyStoreTests.swift */,
 				66F4BCA5504740843AF0C85D /* QuotaSnapshotTests.swift */,
+				851F72E4EC9EC1B8EA86AFBF /* SyntheticClientTests.swift */,
+				C4250EB928A2823E2C0C1ED3 /* TestDoubles.swift */,
+				E6A1DB7C89896BE3440207E4 /* UsageStoreTests.swift */,
 			);
 			path = AllotmentTests;
 			sourceTree = "<group>";
@@ -257,6 +266,9 @@
 			files = (
 				FFD7606A61640801B4888DA0 /* APIKeyStoreTests.swift in Sources */,
 				DE6C9F6460675CB968953984 /* QuotaSnapshotTests.swift in Sources */,
+				6A0CC8DA172FFF2BCEEE62F5 /* SyntheticClientTests.swift in Sources */,
+				25DF7070CF72F16479914BD3 /* TestDoubles.swift in Sources */,
+				98753202E55956E6C58C9FF0 /* UsageStoreTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -10,6 +10,7 @@ struct DashboardView: View {
 
     let store: UsageStore
     @State private var selectedTab = AppTab.current
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         ZStack {
@@ -19,7 +20,7 @@ struct DashboardView: View {
                     page {
                         VStack(alignment: .leading, spacing: 24) {
                             CurrentHeader(store: store)
-                            CurrentUsageContent(store: store)
+                            CurrentUsageContent(store: store, onUpdateKey: { selectedTab = .settings })
                         }
                     }
                     .refreshable { await store.refresh() }
@@ -45,8 +46,11 @@ struct DashboardView: View {
             .tint(.alloRequestFill)
             .toolbarBackground(Color.alloPaper, for: .tabBar)
             .toolbarBackground(.visible, for: .tabBar)
-            .task {
-                if store.snapshot == nil { await store.refresh() }
+            .task { await store.refresh() }
+            .onChange(of: scenePhase) { _, phase in
+                if phase == .active {
+                    Task { await store.refresh() }
+                }
             }
         }
     }
@@ -107,13 +111,18 @@ private struct CurrentHeader: View {
 
 private struct CurrentUsageContent: View {
     let store: UsageStore
+    var onUpdateKey: () -> Void
 
     var body: some View {
         if let snapshot = store.snapshot {
             TimelineView(.periodic(from: .now, by: 60)) { context in
                 VStack(alignment: .leading, spacing: 24) {
-                    if store.errorMessage != nil {
-                        StaleDataBanner()
+                    if let errorMessage = store.errorMessage {
+                        StaleDataBanner(
+                            message: errorMessage,
+                            needsKeyUpdate: store.needsKeyUpdate,
+                            onUpdateKey: onUpdateKey
+                        )
                     }
                     CurrentUsageView(
                         snapshot: snapshot,
@@ -122,8 +131,8 @@ private struct CurrentUsageContent: View {
                         refresh: { Task { await store.refresh() } }
                     )
                 }
-                .task(id: isRefillDue(snapshot: snapshot, now: context.date)) {
-                    if isRefillDue(snapshot: snapshot, now: context.date), !store.isLoading {
+                .task(id: context.date) {
+                    if isRefillDue(snapshot: snapshot, now: context.date) {
                         await store.refresh()
                     }
                 }
@@ -139,7 +148,8 @@ private struct CurrentUsageContent: View {
             EmptyUsageView(
                 message: store.errorMessage ?? "No quota data is available yet.",
                 retry: { Task { await store.refresh() } },
-                isError: store.errorMessage != nil
+                isError: store.errorMessage != nil,
+                onUpdateKey: store.needsKeyUpdate ? onUpdateKey : nil
             )
         }
     }
@@ -147,17 +157,32 @@ private struct CurrentUsageContent: View {
     private func isRefillDue(snapshot: QuotaResponse, now: Date) -> Bool {
         let weekly = snapshot.weeklyTokenLimit?.nextRefillDate ?? .distantFuture
         let rolling = snapshot.rollingFiveHourLimit?.nextTickDate ?? .distantFuture
-        return weekly < now || rolling < now
+        return weekly <= now || rolling <= now
     }
 }
 
 private struct StaleDataBanner: View {
+    let message: String
+    var needsKeyUpdate = false
+    var onUpdateKey: () -> Void = {}
+
     var body: some View {
-        HStack(spacing: 8) {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .accessibilityHidden(true)
-            Text("Couldn't refresh — showing last known data.")
-                .font(.caption.bold())
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(alignment: .top, spacing: 8) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .accessibilityHidden(true)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(message)
+                        .font(.caption.bold())
+                    Text("Showing last known data.")
+                        .font(.caption)
+                }
+            }
+            if needsKeyUpdate {
+                Button("Update key", action: onUpdateKey)
+                    .font(.caption.bold())
+                    .foregroundStyle(Color.alloStickerInk)
+            }
         }
         .foregroundStyle(Color.alloError)
         .padding(12)
@@ -165,6 +190,10 @@ private struct StaleDataBanner: View {
         .background(Color.alloError.opacity(0.12))
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(Color.alloError.opacity(0.4), lineWidth: 1.5))
+        .accessibilityElement(children: .combine)
+        .onAppear {
+            AccessibilityNotification.Announcement("\(message) Showing last known data.").post()
+        }
     }
 }
 
@@ -180,6 +209,7 @@ private struct CurrentUsageView: View {
             Text("TODAY'S CHECK-IN ✿")
                 .font(.system(.headline, design: .rounded, weight: .black))
                 .tracking(0.5)
+                .foregroundStyle(Color.alloStickerInk)
                 .padding(.horizontal, 17)
                 .padding(.vertical, 11)
                 .background(Color.alloPink)
@@ -193,7 +223,9 @@ private struct CurrentUsageView: View {
                 if sizeClass == .regular {
                     HStack(alignment: .top, spacing: 24) {
                         QuotaBarsCard(provider: .synthetic, weekly: weekly, rolling: rolling, lastUpdated: lastUpdated, now: now)
+                            .frame(maxWidth: .infinity, alignment: .top)
                         WeeklyPlannerCard(limit: weekly, now: now)
+                            .frame(maxWidth: .infinity, alignment: .top)
                     }
                 } else {
                     QuotaBarsCard(provider: .synthetic, weekly: weekly, rolling: rolling, lastUpdated: lastUpdated, now: now)
@@ -279,7 +311,7 @@ private struct QuotaBarsCard: View {
 private struct GateBarSection: View {
     let icon: String
     let iconColor: Color
-    var iconForeground = Color.alloInk
+    var iconForeground = Color.alloStickerInk
     let title: String
     let subtitle: String
     let value: String
@@ -532,8 +564,11 @@ private struct WeeklyPlannerCard: View {
 
                 Slider(value: $target, in: limit.remaining...limit.maximum, step: limit.refillAmount)
                     .tint(.alloPurple)
+                    .padding(8)
+                    .background(Color.alloStickerPaper)
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
                     .accessibilityLabel("Target weekly reserve")
-                    .accessibilityValue(Text(target, format: .currency(code: "USD")))
+                    .accessibilityValue("\(target.formatted(.currency(code: "USD"))), \(duration(limit.timeToReach(target, now: now)))")
 
                 HStack(spacing: 12) {
                     Stamp(icon: "clock", color: Color.alloPurple.opacity(0.25))
@@ -570,18 +605,19 @@ private struct UsageHistoryView: View {
     @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
-        let visibleHistory = Array(history.suffix(days))
+        let visibleHistory = history.occurring(inLastDays: days)
 
         VStack(alignment: .leading, spacing: 22) {
-            Text("YOUR WEEK SO FAR ✿")
+            Text(days == 7 ? "YOUR WEEK SO FAR ✿" : "YOUR MONTH SO FAR ✿")
                 .font(.system(.headline, design: .rounded, weight: .black))
                 .tracking(0.6)
+                .foregroundStyle(Color.alloStickerInk)
                 .padding(.horizontal, 17)
                 .padding(.vertical, 11)
                 .background(Color.alloPink)
                 .stickerBorder(shadow: .alloInkShadow, cornerRadius: 10, offset: 5)
                 .rotationEffect(.degrees(-1.7))
-                .accessibilityLabel("Your week so far")
+                .accessibilityLabel(days == 7 ? "Your week so far" : "Your month so far")
                 .accessibilityAddTraits(.isHeader)
 
             HStack(alignment: .bottom) {
@@ -644,17 +680,20 @@ private struct UsageHistoryView: View {
                 .foregroundStyle(Self.chartColor(for: item.date))
                 .cornerRadius(7)
                 .annotation(position: .top) {
-                    let label = Text(item.weeklyRemaining, format: .currency(code: "USD").precision(.fractionLength(0)))
-                        .font(.caption2.bold())
-                    if colorScheme == .dark {
-                        label
-                            .foregroundStyle(Color.alloStickerInk)
-                            .padding(.horizontal, 5)
-                            .padding(.vertical, 2)
-                            .background(Color.alloMauve, in: RoundedRectangle(cornerRadius: 5))
-                            .padding(.bottom, 3)
-                    } else {
-                        label.foregroundStyle(Color.alloInk)
+                    if days == 7 {
+                        let label = Text(item.weeklyRemaining, format: .currency(code: "USD").precision(.fractionLength(2)))
+                            .font(.caption2.bold())
+                            .accessibilityHidden(true)
+                        if colorScheme == .dark {
+                            label
+                                .foregroundStyle(Color.alloStickerInk)
+                                .padding(.horizontal, 5)
+                                .padding(.vertical, 2)
+                                .background(Color.alloMauve, in: RoundedRectangle(cornerRadius: 5))
+                                .padding(.bottom, 3)
+                        } else {
+                            label.foregroundStyle(Color.alloInk)
+                        }
                     }
                 }
             }
@@ -666,8 +705,14 @@ private struct UsageHistoryView: View {
                 }
             }
             .chartXAxis {
-                AxisMarks(values: .stride(by: .day)) { _ in
-                    AxisValueLabel(format: .dateTime.weekday(.short))
+                if days == 30 {
+                    AxisMarks(values: .stride(by: .weekOfYear)) { _ in
+                        AxisValueLabel(format: .dateTime.month(.abbreviated).day())
+                    }
+                } else {
+                    AxisMarks(values: .stride(by: .day)) { _ in
+                        AxisValueLabel(format: .dateTime.weekday(.short))
+                    }
                 }
             }
             .frame(height: 206)
@@ -698,11 +743,12 @@ private struct UsageHistoryView: View {
     private func rangeButton(_ value: Int) -> some View {
         Button(value == 7 ? "7D" : "30D") { days = value }
             .font(.caption.bold())
-            .foregroundStyle(Color.alloInk)
+            .foregroundStyle(days == value ? Color.alloStickerInk : Color.alloInk)
             .padding(.horizontal, 9)
             .frame(minHeight: 44)
             .background(days == value ? Color.alloMauve : .clear)
             .clipShape(RoundedRectangle(cornerRadius: 7))
+            .accessibilityLabel(value == 7 ? "7 days" : "30 days")
             .accessibilityAddTraits(days == value ? .isSelected : [])
     }
 
@@ -721,7 +767,11 @@ private struct UsageHistoryView: View {
     }
 
     private func dayName(_ date: Date?) -> String {
-        date?.formatted(.dateTime.weekday(.wide)) ?? "—"
+        guard let date else { return "—" }
+        if days == 30 {
+            return date.formatted(.dateTime.month(.abbreviated).day())
+        }
+        return date.formatted(.dateTime.weekday(.wide))
     }
 }
 
@@ -767,7 +817,7 @@ private struct RefillFact: View {
         }
         .frame(maxWidth: .infinity, minHeight: 50, alignment: .leading)
         .padding(11)
-        .background(Color.alloPaper.opacity(0.66))
+        .background(Color.alloStickerPaper.opacity(0.86))
         .overlay(RoundedRectangle(cornerRadius: 11).strokeBorder(Color.alloStickerInk.opacity(0.85), lineWidth: 1.5))
         .clipShape(RoundedRectangle(cornerRadius: 11))
     }
@@ -821,6 +871,7 @@ private struct EmptyUsageView: View {
     let message: String
     let retry: () -> Void
     var isError: Bool = false
+    var onUpdateKey: (() -> Void)?
 
     var body: some View {
         VStack(spacing: 16) {
@@ -831,6 +882,12 @@ private struct EmptyUsageView: View {
                 .multilineTextAlignment(.center)
             Button("Try Again", action: retry)
                 .font(.headline)
+                .foregroundStyle(Color.alloStickerInk)
+            if onUpdateKey != nil {
+                Button("Update key", action: onUpdateKey ?? {})
+                    .font(.subheadline.bold())
+                    .foregroundStyle(Color.alloStickerInk)
+            }
         }
         .padding(28)
         .frame(maxWidth: .infinity)
@@ -847,7 +904,7 @@ private struct EmptyHistoryView: View {
                 .accessibilityHidden(true)
             Text("No history yet")
                 .font(.system(.headline, design: .rounded, weight: .bold))
-            Text("Your first successful check-in will start the chart.")
+            Text("Your first successful check-in will start the chart. Days without a check-in stay empty.")
                 .font(.subheadline)
                 .foregroundStyle(Color.alloMuted)
         }
